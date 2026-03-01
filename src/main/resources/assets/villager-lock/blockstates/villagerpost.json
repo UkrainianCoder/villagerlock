@@ -1,5 +1,8 @@
 {
   "variants": {
-    "": { "model": "villager-lock:block/villagerpost" }
+    "facing=north": { "model": "villager-lock:block/villagerpost" },
+    "facing=south": { "model": "villager-lock:block/villagerpost", "y": 180 },
+    "facing=east":  { "model": "villager-lock:block/villagerpost", "y": 90 },
+    "facing=west":  { "model": "villager-lock:block/villagerpost", "y": 270 }
   }
 }

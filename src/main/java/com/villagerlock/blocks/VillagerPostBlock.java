@@ -14,6 +14,7 @@ import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -50,12 +51,15 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 
 	public VillagerPostBlock(AbstractBlock.Settings settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(Properties.WATERLOGGED, false));
+		this.setDefaultState(this.stateManager.getDefaultState()
+				.with(Properties.WATERLOGGED, false)
+				.with(Properties.FACING, Direction.NORTH));
 	}
 
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		builder.add(Properties.WATERLOGGED);
+		builder.add(Properties.FACING);
 	}
 
 	@Override
@@ -129,6 +133,11 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 		}
 
 		return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+	}
+
+	@Override
+	public BlockState getPlacementState(ItemPlacementContext ctx) {
+		return this.getDefaultState().with(Properties.FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 	}
 
 	@Override
