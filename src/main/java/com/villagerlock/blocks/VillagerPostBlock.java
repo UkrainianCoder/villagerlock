@@ -58,7 +58,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 		if (!world.isClient() && type == ModBlocks.VILLAGER_POST_ENTITY) {
 			return (w, pos, s, be) -> {
 				if (be instanceof VillagerPostBlockEntity post) {
-					VillagerPostBlockEntity.onTick(w, pos, s, post);
+					VillagerPostBlockEntity.onTick(w, post);
 				}
 			};
 		}

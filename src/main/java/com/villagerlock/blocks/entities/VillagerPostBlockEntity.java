@@ -17,7 +17,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		super(VILLAGER_POST_ENTITY, pos, state);
 	}
 
-	public static void onTick(World world, BlockPos pos, BlockState state, VillagerPostBlockEntity blockEntity) {
+	public static void onTick(World world, VillagerPostBlockEntity blockEntity) {
 		if (blockEntity.isOccupied()) {
 			boolean kill = false;
 			Entity rider = world.getEntityById(blockEntity.getEntityId());
