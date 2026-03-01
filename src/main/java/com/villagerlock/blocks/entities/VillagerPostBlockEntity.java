@@ -4,14 +4,18 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.UUID;
 
 import static com.villagerlock.ModBlocks.VILLAGER_POST_ENTITY;
 
 public class VillagerPostBlockEntity extends BlockEntity {
-	private int entityId = -1;
-	private int seatId = -1;
+	private UUID _entityUuid = null;
+	private UUID _seatUuid = null;
 
 	public VillagerPostBlockEntity(BlockPos pos, BlockState state) {
 		super(VILLAGER_POST_ENTITY, pos, state);
@@ -20,8 +24,8 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	public static void onTick(World world, VillagerPostBlockEntity blockEntity) {
 		if (blockEntity.isOccupied()) {
 			boolean kill = false;
-			Entity rider = world.getEntityById(blockEntity.getEntityId());
-			Entity seat = world.getEntityById(blockEntity.getSeatId());
+			Entity rider = world.getEntity(blockEntity.getEntityUuid());
+			Entity seat = world.getEntity(blockEntity.getSeatUuid());
 
 			if (rider == null || rider.getVehicle() != seat) {
 				kill = true;
@@ -38,15 +42,15 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	public boolean isOccupied() {
-		return entityId != -1 && seatId != -1;
+		return _entityUuid != null && _seatUuid != null;
 	}
 
-	public int getEntityId() {
-		return entityId;
+	public UUID getEntityUuid() {
+		return _entityUuid;
 	}
 
-	public int getSeatId() {
-		return seatId;
+	public UUID getSeatUuid() {
+		return _seatUuid;
 	}
 
 	public void seat(World world, Entity entity) {
@@ -55,14 +59,15 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		seat.setNoGravity(true);
 		world.spawnEntity(seat);
 		entity.startRiding(seat);
-		this.entityId = entity.getId();
-		this.seatId = seat.getId();
+
+		this._entityUuid = entity.getUuid();
+		this._seatUuid = seat.getUuid();
 	}
 
 	public void unseat(World world) {
-		if (seatId != -1 && entityId != -1) {
-			Entity seat = world.getEntityById(seatId);
-			Entity rider = world.getEntityById(entityId);
+		if (this.isOccupied()) {
+			Entity seat = world.getEntity(_seatUuid);
+			Entity rider = world.getEntity(_entityUuid);
 
 			if (seat != null) {
 				seat.remove(Entity.RemovalReason.DISCARDED);
@@ -72,8 +77,34 @@ public class VillagerPostBlockEntity extends BlockEntity {
 				rider.stopRiding();
 			}
 
-			this.entityId = -1;
-			this.seatId = -1;
+			this._entityUuid = null;
+			this._seatUuid = null;
+		}
+	}
+
+	@Override
+	protected void readData(ReadView view) {
+		super.readData(view);
+
+		String entityUuidStr = view.getString("EntityUuid", "");
+		String seatUuidStr = view.getString("SeatUuid", "");
+
+		if (!entityUuidStr.isEmpty() && !seatUuidStr.isEmpty()) {
+			this._entityUuid = UUID.fromString(entityUuidStr);
+			this._seatUuid = UUID.fromString(seatUuidStr);
+		}
+	}
+
+	@Override
+	protected void writeData(WriteView view) {
+		super.writeData(view);
+
+		if (this.isOccupied()) {
+			view.putString("EntityUuid", _entityUuid.toString());
+			view.putString("SeatUuid", _seatUuid.toString());
+		} else {
+			view.putString("EntityUuid", "");
+			view.putString("SeatUuid", "");
 		}
 	}
 }
