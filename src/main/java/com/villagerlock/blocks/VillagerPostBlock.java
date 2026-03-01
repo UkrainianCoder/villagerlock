@@ -20,6 +20,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.block.WireOrientation;
 import net.minecraft.world.event.listener.GameEventListener;
 import org.jspecify.annotations.Nullable;
 
@@ -89,6 +90,16 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 
 		if (!postBlockEntity.isOccupied() && entity.getVehicle() == null && entity instanceof VillagerEntity) {
 			postBlockEntity.seat(world, entity);
+		}
+	}
+
+	@Override
+	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, WireOrientation wireOrientation, boolean notify) {
+		if (!world.isClient()) {
+			boolean hasSignal = world.isReceivingRedstonePower(pos);
+			if (hasSignal && world.getBlockEntity(pos) instanceof VillagerPostBlockEntity post && post.isOccupied()) {
+				post.unseat(world);
+			}
 		}
 	}
 

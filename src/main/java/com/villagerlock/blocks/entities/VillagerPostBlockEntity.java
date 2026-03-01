@@ -89,6 +89,10 @@ public class VillagerPostBlockEntity extends BlockEntity {
 			unseat(world);
 		}
 
+		if (world.isReceivingRedstonePower(pos)) {
+			return;
+		}
+
 		freezeEntity(entity);
 		this._entityUuid = entity.getUuid();
 	}
