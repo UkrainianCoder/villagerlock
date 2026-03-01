@@ -1,38 +1,31 @@
 {
-	"schemaVersion": 1,
-	"id": "villager-lock",
-	"version": "${version}",
-	"name": "Villager Lock",
-	"description": "This is an example description! Tell everyone what your mod is about!",
-	"authors": [
-		"Me!"
-	],
-	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
-	},
-	"license": "CC0-1.0",
-	"icon": "assets/villager-lock/icon.png",
-	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"com.villagerlock.VillagerLock"
-		],
-		"client": [
-			"com.villagerlock.VillagerLockClient"
-		]
-	},
-	"mixins": [
-		"villager-lock.mixins.json",
-		{
-			"config": "villager-lock.client.mixins.json",
-			"environment": "client"
-		}
-	],
-	"depends": {
-		"fabricloader": ">=0.18.4",
-		"minecraft": "~1.21.11",
-		"java": ">=21",
-		"fabric-api": "*"
-	}
+  "schemaVersion": 1,
+  "id": "villager-lock",
+  "version": "${version}",
+  "name": "Villager Lock",
+  "description": "This is an example description! Tell everyone what your mod is about!",
+  "authors": [
+    "Me!"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "CC0-1.0",
+  "icon": "assets/villager-lock/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "com.villagerlock.VillagerLock"
+    ]
+  },
+  "mixins": [
+    "villager-lock.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.18.4",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
 }
