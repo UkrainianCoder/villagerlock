@@ -6,9 +6,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.state.property.Properties;
 import net.minecraft.storage.ReadView;
 import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -41,6 +43,10 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	private void freezeEntity(Entity entity) {
+		BlockState state = entity.getEntityWorld().getBlockState(pos);
+		Direction facing = state.contains(Properties.HORIZONTAL_FACING) ? state.get(Properties.HORIZONTAL_FACING) : Direction.NORTH;
+		float blockYaw = facing.getPositiveHorizontalDegrees();
+
 		entity.setNoGravity(true);
 
 		if (entity instanceof LivingEntity living) {
@@ -58,14 +64,20 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		}
 
 		entity.setVelocity(Vec3d.ZERO);
-		entity.velocityDirty = true;
 		entity.refreshPositionAndAngles(
 				pos.getX() + 0.5,
 				pos.getY() + 0.05,
 				pos.getZ() + 0.5,
-				entity.getYaw(),
-				entity.getPitch()
+				blockYaw,
+				0.00f
 		);
+
+		if (entity instanceof LivingEntity living) {
+			living.setHeadYaw(blockYaw);
+			living.setBodyYaw(blockYaw);
+		}
+
+		entity.velocityDirty = true;
 	}
 
 	private void unfreezeEntity(Entity entity) {
