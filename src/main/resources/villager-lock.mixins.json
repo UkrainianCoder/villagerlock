@@ -3,7 +3,7 @@
 	"package": "com.villagerlock.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ExampleMixin"
+		"VillagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
