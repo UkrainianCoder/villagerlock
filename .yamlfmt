@@ -1,0 +1,14 @@
+formatter:
+    type: basic
+    indent: 4
+    include_document_start: false
+    retain_line_breaks: true
+    eof_newline: true
+    trim_trailing_whitespace: true
+    max_line_length: 110000
+
+basic:
+    indent: 4
+    line_ending: lf
+    collapse_containers: false
+    collapse_flow_style: false
