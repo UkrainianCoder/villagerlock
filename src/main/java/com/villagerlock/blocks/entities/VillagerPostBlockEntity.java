@@ -9,15 +9,15 @@ import net.minecraft.world.World;
 
 import static com.villagerlock.ModBlocks.VILLAGER_POST_ENTITY;
 
-public class VillagerPostEntity extends BlockEntity {
+public class VillagerPostBlockEntity extends BlockEntity {
 	private int entityId = -1;
 	private int seatId = -1;
 
-	public VillagerPostEntity(BlockPos pos, BlockState state) {
+	public VillagerPostBlockEntity(BlockPos pos, BlockState state) {
 		super(VILLAGER_POST_ENTITY, pos, state);
 	}
 
-	public static void onTick(World world, BlockPos pos, BlockState state, VillagerPostEntity blockEntity) {
+	public static void onTick(World world, BlockPos pos, BlockState state, VillagerPostBlockEntity blockEntity) {
 		if (blockEntity.isOccupied()) {
 			boolean kill = false;
 			Entity rider = world.getEntityById(blockEntity.getEntityId());
