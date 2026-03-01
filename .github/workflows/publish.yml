@@ -1,0 +1,107 @@
+name: Publish on release
+
+on:
+    workflow_dispatch:
+
+permissions:
+    contents: write
+
+jobs:
+    creation:
+        runs-on: ubuntu-latest
+        outputs:
+            tag: ${{ steps.tags.outputs.LAST_TAG }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            - name: Detect tags
+              id: tags
+              run: |
+                ALL_TAGS=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-beta|-alpha)?$')
+                LAST_TAG=$(echo "$ALL_TAGS" | sed -n '1p')
+                PREV_TAG=$(echo "$ALL_TAGS" | sed -n '2p')
+
+                echo "LAST_TAG=$LAST_TAG" >> $GITHUB_OUTPUT
+                echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
+
+            - name: Generate release body
+              run: |
+                REPO_URL="https://github.com/${{ github.repository }}"
+                CHANGELOG_URL="$REPO_URL/compare/${{ steps.tags.outputs.PREV_TAG }}...${{ steps.tags.outputs.LAST_TAG }}"
+
+                if [ -z "$PREV_TAG" ]; then
+                    GIT_LOG=$(git log ${{ steps.tags.outputs.LAST_TAG }} --pretty=format:"- [#%h]($REPO_URL/commit/%h): %s")
+                else
+                    GIT_LOG=$(git log ${{ steps.tags.outputs.PREV_TAG }}..${{ steps.tags.outputs.LAST_TAG }} --pretty=format:"- [#%h]($REPO_URL/commit/%h): %s")
+                fi
+
+                {
+                  echo "**Full Changelog**: $CHANGELOG_URL"
+                  echo
+                  echo "$GIT_LOG"
+                } > release_body.md
+
+            - name: Create release
+              uses: actions/create-release@v1
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              with:
+                tag_name: ${{ steps.tags.outputs.LAST_TAG }}
+                release_name: ${{ steps.tags.outputs.LAST_TAG }}
+                body_path: release_body.md
+                prerelease: ${{ contains(steps.tags.outputs.LAST_TAG, '-beta') || contains(steps.tags.outputs.LAST_TAG, '-alpha') }}
+
+    build:
+        runs-on: ubuntu-24.04
+        needs: creation
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Setup JDK
+              uses: actions/setup-java@v4
+              with:
+                java-version: 25
+                distribution: microsoft
+
+            - name: Validate gradle wrapper
+              uses: gradle/actions/wrapper-validation@v4
+
+            - name: Make gradlew executable
+              run: chmod +x ./gradlew
+
+            - name: Build project
+              run: ./gradlew build
+
+            - name: Upload artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: build-artifacts
+                path: build/libs/*
+
+
+    upload:
+        runs-on: ubuntu-latest
+        needs:
+            - creation
+            - build
+
+        steps:
+            - name: Download artifacts
+              uses: actions/download-artifact@v4
+              with:
+                name: build-artifacts
+                path: artifacts
+
+            - name: Upload assets to release
+              uses: softprops/action-gh-release@v2
+              with:
+                tag_name: ${{ needs.creation.outputs.tag }}
+                files: artifacts/*
+              env:
+                GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
