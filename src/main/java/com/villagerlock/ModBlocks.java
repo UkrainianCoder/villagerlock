@@ -22,6 +22,7 @@ import static com.villagerlock.VillagerLock.LOGGER;
 
 public class ModBlocks {
 	public static final Identifier VILLAGER_POST_ID = Identifier.of(VillagerLock.MOD_ID, "villagerpost");
+
 	public static final Block VILLAGER_POST = register(
 			VILLAGER_POST_ID,
 			VillagerPostBlock::new,
@@ -33,11 +34,7 @@ public class ModBlocks {
 					.burnable()
 	);
 
-	public static final Item VILLAGER_POST_ITEM = register(
-			VILLAGER_POST_ID,
-			VILLAGER_POST,
-			new Item.Settings()
-	);
+	public static final Item VILLAGER_POST_ITEM = register(VILLAGER_POST_ID, VILLAGER_POST, new Item.Settings());
 
 	private static <T extends Block> T register(Identifier id, Function<AbstractBlock.Settings, T> blockFactory, AbstractBlock.Settings blockSettings) {
 		RegistryKey<Block> key = RegistryKey.of(Registries.BLOCK.getKey(), id);
@@ -53,16 +50,10 @@ public class ModBlocks {
 		Registry.register(Registries.ITEM, id, item);
 		LOGGER.info("Registered item with ID: {}", id);
 		return item;
-	}	public static final BlockEntityType<VillagerPostBlockEntity> VILLAGER_POST_ENTITY = Registry.register(
-			Registries.BLOCK_ENTITY_TYPE,
-			VILLAGER_POST_ID,
-			FabricBlockEntityTypeBuilder.create(VillagerPostBlockEntity::new, VILLAGER_POST).build()
-	);
+	}
 
 	public static void initialize() {
 	}
 
-
-
-
+	public static final BlockEntityType<VillagerPostBlockEntity> VILLAGER_POST_ENTITY = Registry.register(Registries.BLOCK_ENTITY_TYPE, VILLAGER_POST_ID, FabricBlockEntityTypeBuilder.create(VillagerPostBlockEntity::new, VILLAGER_POST).build());
 }
