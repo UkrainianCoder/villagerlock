@@ -9,6 +9,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCollisionHandler;
+import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.resource.featuretoggle.FeatureSet;
@@ -88,7 +89,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 			return;
 		}
 
-		if (!postBlockEntity.isOccupied() && entity.getVehicle() == null && entity instanceof VillagerEntity) {
+		if (!postBlockEntity.isOccupied() && entity.getVehicle() == null && (entity instanceof VillagerEntity || entity instanceof ZombieEntity)) {
 			postBlockEntity.seat(world, entity);
 		}
 	}
