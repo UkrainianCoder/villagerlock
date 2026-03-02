@@ -82,8 +82,8 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 				if (customEntity instanceof VillagerPostBlockEntity blockEntity) {
 					if (blockEntity.isOccupied()) {
 						Entity rider = tickerWorld.getEntity(blockEntity.getEntityUuid());
-						if (rider == null) {
-							blockEntity.unseat(world, false);
+						if (rider == null || rider.squaredDistanceTo(tickerPos.getX() + 0.5, tickerPos.getY(), tickerPos.getZ() + 0.5) > 2.0D) {
+							blockEntity.unseat(tickerWorld, false);
 						}
 					}
 				}
