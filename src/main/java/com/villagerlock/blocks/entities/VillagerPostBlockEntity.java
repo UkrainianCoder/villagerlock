@@ -64,6 +64,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		}
 
 		if (entity instanceof MobEntity mobEntity) {
+			mobEntity.getNavigation().stop();
 			mobEntity.setForwardSpeed(0);
 			mobEntity.setSidewaysSpeed(0);
 		}
