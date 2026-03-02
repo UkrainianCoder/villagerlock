@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W W",
+    "OSO"
+  ],
+  "key": {
+    "W": "minecraft:stone",
+    "O": "minecraft:acacia_log",
+    "S": "minecraft:stripped_acacia_log"
+  },
+  "result": {
+    "id": "villager-lock:villagerpost_acacia",
+    "count": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W W",
+    "OSO"
+  ],
+  "key": {
+    "W": "minecraft:stone",
+    "O": "minecraft:spruce_log",
+    "S": "minecraft:stripped_spruce_log"
+  },
+  "result": {
+    "id": "villager-lock:villagerpost_spruce",
+    "count": 1
+  }
+}

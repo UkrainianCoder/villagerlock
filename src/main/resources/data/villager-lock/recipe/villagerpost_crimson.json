@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W W",
+    "OSO"
+  ],
+  "key": {
+    "W": "minecraft:stone",
+    "O": "minecraft:crimson_stem",
+    "S": "minecraft:stripped_crimson_stem"
+  },
+  "result": {
+    "id": "villager-lock:villagerpost_crimson",
+    "count": 1
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "block.villager-lock.villagerpost": "Dorfbewohnerposten aus Eichenholz",
+  "item.villager-lock.villagerpost": "Dorfbewohnerposten aus Eichenholz",
+
+  "block.villager-lock.villagerpost_acacia": "Dorfbewohnerposten aus Akazienholz",
+  "item.villager-lock.villagerpost_acacia": "Dorfbewohnerposten aus Akazienholz",
+
+  "block.villager-lock.villagerpost_birch": "Dorfbewohnerposten aus Birkenholz",
+  "item.villager-lock.villagerpost_birch": "Dorfbewohnerposten aus Birkenholz",
+
+  "block.villager-lock.villagerpost_cherry": "Dorfbewohnerposten aus Kirschholz",
+  "item.villager-lock.villagerpost_cherry": "Dorfbewohnerposten aus Kirschholz",
+
+  "block.villager-lock.villagerpost_crimson": "Karmesin-Dorfbewohnerposten",
+  "item.villager-lock.villagerpost_crimson": "Karmesin-Dorfbewohnerposten",
+
+  "block.villager-lock.villagerpost_dark_oak": "Dorfbewohnerposten aus Schwarzeichenholz",
+  "item.villager-lock.villagerpost_dark_oak": "Dorfbewohnerposten aus Schwarzeichenholz",
+
+  "block.villager-lock.villagerpost_jungle": "Dorfbewohnerposten aus Tropenholz",
+  "item.villager-lock.villagerpost_jungle": "Dorfbewohnerposten aus Tropenholz",
+
+  "block.villager-lock.villagerpost_mangrove": "Dorfbewohnerposten aus Mangrobenholz",
+  "item.villager-lock.villagerpost_mangrove": "Dorfbewohnerposten aus Mangrobenholz",
+
+  "block.villager-lock.villagerpost_pale_oak": "Dorfbewohnerposten aus Blasszeichenholz",
+  "item.villager-lock.villagerpost_pale_oak": "Dorfbewohnerposten aus Blasszeichenholz",
+
+  "block.villager-lock.villagerpost_spruce": "Dorfbewohnerposten aus Fichtenholz",
+  "item.villager-lock.villagerpost_spruce": "Dorfbewohnerposten aus Fichtenholz",
+
+  "block.villager-lock.villagerpost_warped": "Wirr-Dorfbewohnerposten",
+  "item.villager-lock.villagerpost_warped": "Wirr-Dorfbewohnerposten"
+}

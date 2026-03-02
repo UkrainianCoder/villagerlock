@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W W",
+    "OSO"
+  ],
+  "key": {
+    "W": "minecraft:stone",
+    "O": "minecraft:cherry_log",
+    "S": "minecraft:stripped_cherry_log"
+  },
+  "result": {
+    "id": "villager-lock:villagerpost_cherry",
+    "count": 1
+  }
+}
