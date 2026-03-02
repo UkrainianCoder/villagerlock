@@ -9,6 +9,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCollisionHandler;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.ZombieVillagerEntity;
 import net.minecraft.entity.passive.VillagerEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -113,7 +114,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 			return;
 		}
 
-		if (!postBlockEntity.isOccupied() && entity.getVehicle() == null && (entity instanceof VillagerEntity || entity instanceof ZombieVillagerEntity)) {
+		if (!postBlockEntity.isOccupied() && entity.getVehicle() == null && entity instanceof LivingEntity livingEntity && !livingEntity.isSleeping() && (entity instanceof VillagerEntity || entity instanceof ZombieVillagerEntity)) {
 			postBlockEntity.seat(world, entity);
 		}
 	}
