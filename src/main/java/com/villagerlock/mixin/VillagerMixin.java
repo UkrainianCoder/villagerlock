@@ -4,12 +4,20 @@ import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.ai.brain.BlockPosLookTarget;
+import net.minecraft.entity.ai.brain.Brain;
+import net.minecraft.entity.ai.brain.MemoryModuleType;
 import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.GlobalPos;
 import net.minecraft.village.VillagerProfession;
 import net.minecraft.world.World;
+import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -65,6 +73,60 @@ public class VillagerMixin {
 		return null;
 	}
 
+	@Unique
+	private static Object[] findProfessionBlock(ServerWorld world, VillagerEntity villager) {
+		BlockPos pos = villager.getBlockPos();
+		BlockPos[] adjacentPositions = new BlockPos[]{
+				pos.north(),
+				pos.south(),
+				pos.east(),
+				pos.west()
+		};
+
+		for (BlockPos adjacent : adjacentPositions) {
+			Block adjacentBlock = world.getBlockState(adjacent).getBlock();
+			if (BLOCK_PROFESSION_MAP.containsKey(adjacentBlock)) {
+				return new Object[]{adjacent, adjacentBlock};
+			}
+		}
+
+		return null;
+	}
+
+	@Unique
+	private static void tryClaimProfession(ServerWorld world, VillagerEntity villager, RegistryEntry<VillagerProfession> profession, BlockPos professionPos) {
+		Brain<VillagerEntity> brain = villager.getBrain();
+		brain.forget(MemoryModuleType.JOB_SITE);
+		brain.forget(MemoryModuleType.POTENTIAL_JOB_SITE);
+
+		GlobalPos globalPos = GlobalPos.create(world.getRegistryKey(), professionPos);
+		world.getRegistryManager().getOrThrow(RegistryKeys.POINT_OF_INTEREST_TYPE)
+				.streamEntries()
+				.findFirst()
+				.ifPresent(poiType -> {
+					PointOfInterestStorage poiStorage = world.getPointOfInterestStorage();
+					if (poiStorage.getType(professionPos).isEmpty()) {
+						poiStorage.add(professionPos, poiType);
+					}
+
+					brain.remember(MemoryModuleType.POTENTIAL_JOB_SITE, globalPos);
+					brain.remember(MemoryModuleType.LOOK_TARGET, new BlockPosLookTarget(professionPos));
+
+					// villager.setVillagerData(villager.getVillagerData().withProfession(profession));
+				});
+	}
+
+	@Unique
+	private static void tryRemoveProfession(ServerWorld world, VillagerEntity villager) {
+		RegistryEntry<VillagerProfession> professionEntry = Registries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE);
+		Brain<VillagerEntity> brain = villager.getBrain();
+		brain.forget(MemoryModuleType.JOB_SITE);
+		brain.forget(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
+		brain.forget(MemoryModuleType.POTENTIAL_JOB_SITE);
+		brain.forget(MemoryModuleType.LOOK_TARGET);
+		villager.setVillagerData(villager.getVillagerData().withProfession(professionEntry));
+	}
+
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void onTick(CallbackInfo ci) {
 		VillagerEntity villager = (VillagerEntity) (Object) this;
@@ -77,5 +139,22 @@ public class VillagerMixin {
 		}
 
 		VillagerPostBlockEntity post = getVillagerPostEntity(villager);
+		if (post != null) {
+			Object[] result = findProfessionBlock(world, villager);
+
+			if (result == null) {
+				tryRemoveProfession(world, villager);
+				return;
+			}
+
+			BlockPos professionBlockPos = (BlockPos) result[0];
+			Block professionBlock = (Block) result[1];
+			RegistryEntry<VillagerProfession> currentProfession = villager.getVillagerData().profession();
+			RegistryEntry<VillagerProfession> requiredProfession = Registries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
+
+			if (currentProfession.value() != requiredProfession.value()) {
+				tryClaimProfession(world, villager, requiredProfession, professionBlockPos);
+			}
+		}
 	}
 }
