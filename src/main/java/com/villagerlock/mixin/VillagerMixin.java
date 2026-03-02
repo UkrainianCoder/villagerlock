@@ -111,9 +111,14 @@ public class VillagerMixin {
 
 					brain.remember(MemoryModuleType.POTENTIAL_JOB_SITE, globalPos);
 					brain.remember(MemoryModuleType.LOOK_TARGET, new BlockPosLookTarget(professionPos));
-
-					// villager.setVillagerData(villager.getVillagerData().withProfession(profession));
 				});
+	}
+
+	@Unique
+	private static void tryReClaimProfession(ServerWorld world, VillagerEntity villager, RegistryEntry<VillagerProfession> profession, BlockPos professionPos) {
+		Brain<VillagerEntity> brain = villager.getBrain();
+		GlobalPos globalPos = GlobalPos.create(world.getRegistryKey(), professionPos);
+		brain.remember(MemoryModuleType.JOB_SITE, globalPos);
 	}
 
 	@Unique
@@ -132,7 +137,6 @@ public class VillagerMixin {
 		Object[] result = findProfessionBlock(world, villager);
 
 		if (result == null) {
-			tryRemoveProfession(world, villager);
 			return;
 		}
 
@@ -146,6 +150,23 @@ public class VillagerMixin {
 		}
 	}
 
+	@Unique
+	private static void onNonZeroExperience(ServerWorld world, VillagerEntity villager) {
+		Brain<VillagerEntity> brain = villager.getBrain();
+		if (brain.getOptionalMemory(MemoryModuleType.JOB_SITE).isEmpty()) {
+			Object[] result = findProfessionBlock(world, villager);
+			if (result != null) {
+				BlockPos professionBlockPos = (BlockPos) result[0];
+				Block professionBlock = (Block) result[1];
+				RegistryEntry<VillagerProfession> currentProfession = villager.getVillagerData().profession();
+				RegistryEntry<VillagerProfession> requiredProfession = Registries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
+				if (currentProfession.value() == requiredProfession.value()) {
+					tryReClaimProfession(world, villager, currentProfession, professionBlockPos);
+				}
+			}
+		}
+	}
+
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void onTick(CallbackInfo ci) {
 		VillagerEntity villager = (VillagerEntity) (Object) this;
@@ -154,6 +175,7 @@ public class VillagerMixin {
 		}
 
 		if (villager.getExperience() > 0) {
+			onNonZeroExperience(world, villager);
 			return;
 		}
 
