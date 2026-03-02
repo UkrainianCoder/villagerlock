@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W W",
+    "OSO"
+  ],
+  "key": {
+    "W": "minecraft:stone",
+    "O": "minecraft:mangrove_log",
+    "S": "minecraft:stripped_mangrove_log"
+  },
+  "result": {
+    "id": "villager-lock:villagerpost_mangrove",
+    "count": 1
+  }
+}

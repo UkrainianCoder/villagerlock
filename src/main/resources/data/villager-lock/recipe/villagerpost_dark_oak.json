@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W W",
+    "OSO"
+  ],
+  "key": {
+    "W": "minecraft:stone",
+    "O": "minecraft:dark_oak_log",
+    "S": "minecraft:stripped_dark_oak_log"
+  },
+  "result": {
+    "id": "villager-lock:villagerpost_dark_oak",
+    "count": 1
+  }
+}

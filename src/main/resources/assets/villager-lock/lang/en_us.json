@@ -1,4 +1,34 @@
 {
-  "block.villager-lock.villagerpost": "Villager Post",
-  "item.villager-lock.villagerpost": "Villager Post"
+  "block.villager-lock.villagerpost": "Oak Villager Post",
+  "item.villager-lock.villagerpost": "Oak Villager Post",
+
+  "block.villager-lock.villagerpost_acacia": "Acacia Villager Post",
+  "item.villager-lock.villagerpost_acacia": "Acacia Villager Post",
+
+  "block.villager-lock.villagerpost_birch": "Birch Villager Post",
+  "item.villager-lock.villagerpost_birch": "Birch Villager Post",
+
+  "block.villager-lock.villagerpost_cherry": "Cherry Villager Post",
+  "item.villager-lock.villagerpost_cherry": "Cherry Villager Post",
+
+  "block.villager-lock.villagerpost_crimson": "Crimson Villager Post",
+  "item.villager-lock.villagerpost_crimson": "Crimson Villager Post",
+
+  "block.villager-lock.villagerpost_dark_oak": "Dark Oak Villager Post",
+  "item.villager-lock.villagerpost_dark_oak": "Dark Oak Villager Post",
+
+  "block.villager-lock.villagerpost_jungle": "Jungle Villager Post",
+  "item.villager-lock.villagerpost_jungle": "Jungle Villager Post",
+
+  "block.villager-lock.villagerpost_mangrove": "Mangrove Villager Post",
+  "item.villager-lock.villagerpost_mangrove": "Mangrove Villager Post",
+
+  "block.villager-lock.villagerpost_pale_oak": "Pale Oak Villager Post",
+  "item.villager-lock.villagerpost_pale_oak": "Pale Oak Villager Post",
+
+  "block.villager-lock.villagerpost_spruce": "Spruce Villager Post",
+  "item.villager-lock.villagerpost_spruce": "Spruce Villager Post",
+
+  "block.villager-lock.villagerpost_warped": "Warped Villager Post",
+  "item.villager-lock.villagerpost_warped": "Warped Villager Post"
 }

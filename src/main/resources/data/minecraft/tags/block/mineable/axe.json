@@ -1,6 +1,16 @@
 {
   "replace": false,
   "values": [
-    "villager-lock:villagerpost"
+    "villager-lock:villagerpost",
+    "villager-lock:villagerpost_acacia",
+    "villager-lock:villagerpost_birch",
+    "villager-lock:villagerpost_cherry",
+    "villager-lock:villagerpost_crimson",
+    "villager-lock:villagerpost_dark_oak",
+    "villager-lock:villagerpost_jungle",
+    "villager-lock:villagerpost_mangrove",
+    "villager-lock:villagerpost_pale_oak",
+    "villager-lock:villagerpost_spruce",
+    "villager-lock:villagerpost_warped"
   ]
 }

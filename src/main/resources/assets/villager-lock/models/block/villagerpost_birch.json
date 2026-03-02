@@ -2,10 +2,10 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "minecraft:block/oak_planks",
+		"particle": "minecraft:block/birch_planks",
 		"stone": "villager-lock:block/stone_part",
-		"log": "minecraft:block/oak_log",
-		"stripped": "minecraft:block/stripped_oak_log"
+		"log": "minecraft:block/birch_log",
+		"stripped": "minecraft:block/stripped_birch_log"
 	},
 	"elements": [
 		{

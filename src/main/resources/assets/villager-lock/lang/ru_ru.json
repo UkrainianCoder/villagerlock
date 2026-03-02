@@ -1,4 +1,34 @@
 {
-  "block.villager-lock.villagerpost": "Пост жителя",
-  "item.villager-lock.villagerpost": "Пост жителя"
+  "block.villager-lock.villagerpost": "Пост жителя из дуба",
+  "item.villager-lock.villagerpost": "Пост жителя из дуба",
+
+  "block.villager-lock.villagerpost_acacia": "Пост жителя из акации",
+  "item.villager-lock.villagerpost_acacia": "По7ст жителя из акации",
+
+  "block.villager-lock.villagerpost_birch": "Пост жителя из берёзы",
+  "item.villager-lock.villagerpost_birch": "Пост жителя из берёзы",
+
+  "block.villager-lock.villagerpost_cherry": "Пост жителя из вишни",
+  "item.villager-lock.villagerpost_cherry": "Пост жителя из вишни",
+
+  "block.villager-lock.villagerpost_crimson": "Багровый пост жителя",
+  "item.villager-lock.villagerpost_crimson": "Багровый пост жителя",
+
+  "block.villager-lock.villagerpost_dark_oak": "Пост жителя из тёмного дуба",
+  "item.villager-lock.villagerpost_dark_oak": "Пост жителя из тёмного дуба",
+
+  "block.villager-lock.villagerpost_jungle": "Пост жителя из тропического дерева",
+  "item.villager-lock.villagerpost_jungle": "Пост жителя из тропического дерева",
+
+  "block.villager-lock.villagerpost_mangrove": "Пост жителя из мангрового дерева",
+  "item.villager-lock.villagerpost_mangrove": "Пост жителя из мангрового дерева",
+
+  "block.villager-lock.villagerpost_pale_oak": "Пост жителя из бледного дуба",
+  "item.villager-lock.villagerpost_pale_oak": "Пост жителя из бледного дуба",
+
+  "block.villager-lock.villagerpost_spruce": "Пост жителя из ели",
+  "item.villager-lock.villagerpost_spruce": "Пост жителя из ели",
+
+  "block.villager-lock.villagerpost_warped": "Искажённый пост жителя",
+  "item.villager-lock.villagerpost_warped": "Искажённый пост жителя"
 }

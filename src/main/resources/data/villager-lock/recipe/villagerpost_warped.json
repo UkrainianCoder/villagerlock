@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "W W",
+    "OSO"
+  ],
+  "key": {
+    "W": "minecraft:stone",
+    "O": "minecraft:warped_stem",
+    "S": "minecraft:stripped_warped_stem"
+  },
+  "result": {
+    "id": "villager-lock:villagerpost_warped",
+    "count": 1
+  }
+}

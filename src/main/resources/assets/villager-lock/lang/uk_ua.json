@@ -1,0 +1,34 @@
+{
+  "block.villager-lock.villagerpost": "Пост селянина з дуба",
+  "item.villager-lock.villagerpost": "Пост селянина з дуба",
+
+  "block.villager-lock.villagerpost_acacia": "Пост селянина з акації",
+  "item.villager-lock.villagerpost_acacia": "Пост селянина з акації",
+
+  "block.villager-lock.villagerpost_birch": "Пост селянина з берези",
+  "item.villager-lock.villagerpost_birch": "Пост селянина з берези",
+
+  "block.villager-lock.villagerpost_cherry": "Пост селянина з вишні",
+  "item.villager-lock.villagerpost_cherry": "Пост селянина з вишні",
+
+  "block.villager-lock.villagerpost_crimson": "Багряний пост селянина",
+  "item.villager-lock.villagerpost_crimson": "Багряний post селянина",
+
+  "block.villager-lock.villagerpost_dark_oak": "Пост селянина з темного дуба",
+  "item.villager-lock.villagerpost_dark_oak": "Пост селянина з темного дуба",
+
+  "block.villager-lock.villagerpost_jungle": "Пост селянина з тропічного дерева",
+  "item.villager-lock.villagerpost_jungle": "Пост селянина з тропічного дерева",
+
+  "block.villager-lock.villagerpost_mangrove": "Пост селянина з мангрового дерева",
+  "item.villager-lock.villagerpost_mangrove": "Пост селянина з мангрового дерева",
+
+  "block.villager-lock.villagerpost_pale_oak": "Пост селянина з блідого дуба",
+  "item.villager-lock.villagerpost_pale_oak": "Пост селянина з блідого дуба",
+
+  "block.villager-lock.villagerpost_spruce": "Пост селянина з ялини",
+  "item.villager-lock.villagerpost_spruce": "Пост селянина з ялини",
+
+  "block.villager-lock.villagerpost_warped": "Химерний пост селянина",
+  "item.villager-lock.villagerpost_warped": "Химерний пост селянина"
+}
