@@ -127,6 +127,25 @@ public class VillagerMixin {
 		villager.setVillagerData(villager.getVillagerData().withProfession(professionEntry));
 	}
 
+	@Unique
+	private static void onZeroExperience(ServerWorld world, VillagerEntity villager) {
+		Object[] result = findProfessionBlock(world, villager);
+
+		if (result == null) {
+			tryRemoveProfession(world, villager);
+			return;
+		}
+
+		BlockPos professionBlockPos = (BlockPos) result[0];
+		Block professionBlock = (Block) result[1];
+		RegistryEntry<VillagerProfession> currentProfession = villager.getVillagerData().profession();
+		RegistryEntry<VillagerProfession> requiredProfession = Registries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
+
+		if (currentProfession.value() != requiredProfession.value()) {
+			tryClaimProfession(world, villager, requiredProfession, professionBlockPos);
+		}
+	}
+
 	@Inject(method = "tick", at = @At("TAIL"))
 	private void onTick(CallbackInfo ci) {
 		VillagerEntity villager = (VillagerEntity) (Object) this;
@@ -138,23 +157,8 @@ public class VillagerMixin {
 			return;
 		}
 
-		VillagerPostBlockEntity post = getVillagerPostEntity(villager);
-		if (post != null) {
-			Object[] result = findProfessionBlock(world, villager);
-
-			if (result == null) {
-				tryRemoveProfession(world, villager);
-				return;
-			}
-
-			BlockPos professionBlockPos = (BlockPos) result[0];
-			Block professionBlock = (Block) result[1];
-			RegistryEntry<VillagerProfession> currentProfession = villager.getVillagerData().profession();
-			RegistryEntry<VillagerProfession> requiredProfession = Registries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
-
-			if (currentProfession.value() != requiredProfession.value()) {
-				tryClaimProfession(world, villager, requiredProfession, professionBlockPos);
-			}
+		if (getVillagerPostEntity(villager) != null) {
+			onZeroExperience(world, villager);
 		}
 	}
 }
