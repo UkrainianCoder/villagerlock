@@ -110,7 +110,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 							}
 
 							BlockPos targetPos = startPos.add(dx, dy, dz);
-							if (world.isAir(targetPos) && world.isAir(targetPos.up())) {
+							if (world.isAir(targetPos) && world.isAir(targetPos.up()) && world.getBlockState(targetPos.down()).isSolidBlock(world, targetPos.down())) {
 								double finalX = targetPos.getX() + 0.5;
 								double finalY = targetPos.getY();
 								double finalZ = targetPos.getZ() + 0.5;
