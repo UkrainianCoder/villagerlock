@@ -13,10 +13,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
 import static com.villagerlock.ModBlocks.VILLAGER_POST_ENTITY;
+import static com.villagerlock.VillagerLock.LOGGER;
 
 public class VillagerPostBlockEntity extends BlockEntity {
 	private UUID _entityUuid = null;
@@ -24,13 +26,27 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	public VillagerPostBlockEntity(BlockPos pos, BlockState state) {
 		super(VILLAGER_POST_ENTITY, pos, state);
 	}
-	
+
 	public boolean isOccupied() {
 		return _entityUuid != null;
 	}
 
 	public UUID getEntityUuid() {
 		return _entityUuid;
+	}
+
+	public @Nullable Entity getEntity(World world) {
+		if (isOccupied()) {
+			Entity rider = world.getEntity(_entityUuid);
+			if (rider == null || !rider.isAlive()) {
+				unseat(world);
+				return null;
+			}
+
+			return rider;
+		}
+
+		return null;
 	}
 
 	private void freezeEntity(Entity entity) {
@@ -83,32 +99,31 @@ public class VillagerPostBlockEntity extends BlockEntity {
 
 		if (entity instanceof MobEntity mob) {
 			mob.setAiDisabled(false);
-			mob.getNavigation().startMovingTo(pos.getX() + 1, pos.getY(), pos.getZ() + 1, 1);
+			mob.teleport(pos.getX() + 1, pos.getY(), pos.getZ() + 1, false);
 		}
 	}
 
 	public void seat(World world, Entity entity) {
-		if (isOccupied()) {
-			unseat(world);
+		if (!isOccupied() && !world.isReceivingRedstonePower(pos)) {
+			_entityUuid = entity.getUuid();
+			freezeEntity(entity);
+			markDirty();
+			LOGGER.info("Seated {} on {}", _entityUuid, pos);
 		}
-
-		if (world.isReceivingRedstonePower(pos)) {
-			return;
-		}
-
-		freezeEntity(entity);
-		this._entityUuid = entity.getUuid();
 	}
 
 	public void unseat(World world) {
-		if (this.isOccupied()) {
+		if (isOccupied()) {
+			LOGGER.info("Unseated {} on {}", _entityUuid, pos);
+
 			Entity rider = world.getEntity(_entityUuid);
 
 			if (rider != null) {
 				unfreezeEntity(rider);
 			}
 
-			this._entityUuid = null;
+			_entityUuid = null;
+			markDirty();
 		}
 	}
 
@@ -118,7 +133,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 
 		String entityUuidStr = view.getString("EntityUuid", "");
 		if (!entityUuidStr.isEmpty()) {
-			this._entityUuid = UUID.fromString(entityUuidStr);
+			_entityUuid = UUID.fromString(entityUuidStr);
 		}
 	}
 
@@ -126,7 +141,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	protected void writeData(WriteView view) {
 		super.writeData(view);
 
-		if (this.isOccupied()) {
+		if (isOccupied()) {
 			view.putString("EntityUuid", _entityUuid.toString());
 			return;
 		}
