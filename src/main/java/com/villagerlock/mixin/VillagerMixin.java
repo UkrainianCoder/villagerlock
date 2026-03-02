@@ -1,9 +1,8 @@
 package com.villagerlock.mixin;
 
-import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
+import com.villagerlock.blocks.helpers.VillagerPostBlockHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.ai.brain.BlockPosLookTarget;
 import net.minecraft.entity.ai.brain.Brain;
 import net.minecraft.entity.ai.brain.MemoryModuleType;
@@ -16,7 +15,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.GlobalPos;
 import net.minecraft.village.VillagerProfession;
-import net.minecraft.world.World;
 import net.minecraft.world.poi.PointOfInterestStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -52,25 +50,6 @@ public class VillagerMixin {
 		}
 
 		return BLOCK_PROFESSION_MAP.getOrDefault(block, VillagerProfession.NONE);
-	}
-
-	@Unique
-	private static VillagerPostBlockEntity getVillagerPostEntity(VillagerEntity villager) {
-		World world = villager.getEntityWorld();
-		BlockPos pos = villager.getBlockPos();
-		BlockPos[] adjacentPositions = new BlockPos[]{
-				pos,
-				pos.down()
-		};
-
-		for (BlockPos adjacent : adjacentPositions) {
-			BlockEntity blockEntity = world.getBlockEntity(adjacent);
-			if (blockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && villager.getUuid().equals(post.getEntityUuid())) {
-				return post;
-			}
-		}
-
-		return null;
 	}
 
 	@Unique
@@ -174,7 +153,7 @@ public class VillagerMixin {
 			return;
 		}
 
-		if (getVillagerPostEntity(villager) != null) {
+		if (VillagerPostBlockHelper.getVillagerPostEntity(villager) != null) {
 			if (villager.getExperience() > 0) {
 				onNonZeroExperience(world, villager);
 				return;
