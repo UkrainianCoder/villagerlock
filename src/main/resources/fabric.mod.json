@@ -3,13 +3,14 @@
   "id": "villager-lock",
   "version": "${version}",
   "name": "Villager Lock",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "description": "Villager Lock adds the Villager Post, a block designed to lock villagers to their job sites, ensuring perfectly organized and efficient trading halls!",
   "authors": [
-    "Me!"
+    "UkrainianCoder",
+    "xiader45"
   ],
   "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
+    "homepage": "https://github.com/UkrainianCoder/villagerlock",
+    "sources": "https://github.com/UkrainianCoder/villagerlock"
   },
   "license": "CC0-1.0",
   "icon": "assets/villager-lock/icon.png",
