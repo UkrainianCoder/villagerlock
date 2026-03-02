@@ -174,12 +174,12 @@ public class VillagerMixin {
 			return;
 		}
 
-		if (villager.getExperience() > 0) {
-			onNonZeroExperience(world, villager);
-			return;
-		}
-
 		if (getVillagerPostEntity(villager) != null) {
+			if (villager.getExperience() > 0) {
+				onNonZeroExperience(world, villager);
+				return;
+			}
+
 			onZeroExperience(world, villager);
 		}
 	}
