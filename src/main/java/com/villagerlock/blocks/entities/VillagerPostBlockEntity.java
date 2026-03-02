@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.state.property.Properties;
@@ -21,6 +22,8 @@ import static com.villagerlock.ModBlocks.VILLAGER_POST_ENTITY;
 import static com.villagerlock.VillagerLock.LOGGER;
 
 public class VillagerPostBlockEntity extends BlockEntity {
+	private static final int MAX_RADIUS = 5;
+
 	private UUID _entityUuid = null;
 
 	public VillagerPostBlockEntity(BlockPos pos, BlockState state) {
@@ -90,12 +93,35 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		entity.setNoGravity(false);
 
 		if (entity instanceof LivingEntity living) {
-			var attribute = living.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
+			BlockPos startPos = living.getBlockPos();
+			World world = living.getEntityWorld();
+			EntityAttributeInstance attribute = living.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
+
 			if (attribute != null) {
 				attribute.setBaseValue(0.0);
 			}
 
-			living.teleport(pos.getX() + 1, pos.getY(), pos.getZ() + 1, false);
+			for (int r = 0; r <= MAX_RADIUS; r++) {
+				for (int dy = -r; dy <= r; dy++) {
+					for (int dx = -r; dx <= r; dx++) {
+						for (int dz = -r; dz <= r; dz++) {
+							if (Math.abs(dx) != r && Math.abs(dy) != r && Math.abs(dz) != r && r != 0) {
+								continue;
+							}
+
+							BlockPos targetPos = startPos.add(dx, dy, dz);
+							if (world.isAir(targetPos) && world.isAir(targetPos.up())) {
+								double finalX = targetPos.getX() + 0.5;
+								double finalY = targetPos.getY();
+								double finalZ = targetPos.getZ() + 0.5;
+								living.requestTeleport(finalX, finalY, finalZ);
+								living.setVelocity(0, 0, 0);
+								return;
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
