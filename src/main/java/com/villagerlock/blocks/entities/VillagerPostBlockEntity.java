@@ -64,10 +64,8 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		}
 
 		if (entity instanceof MobEntity mobEntity) {
-			mobEntity.getNavigation().stop();
 			mobEntity.setForwardSpeed(0);
 			mobEntity.setSidewaysSpeed(0);
-			mobEntity.setAiDisabled(true);
 		}
 
 		entity.setVelocity(Vec3d.ZERO);
@@ -95,11 +93,8 @@ public class VillagerPostBlockEntity extends BlockEntity {
 			if (attribute != null) {
 				attribute.setBaseValue(0.0);
 			}
-		}
 
-		if (entity instanceof MobEntity mob) {
-			mob.setAiDisabled(false);
-			mob.teleport(pos.getX() + 1, pos.getY(), pos.getZ() + 1, false);
+			living.teleport(pos.getX() + 1, pos.getY(), pos.getZ() + 1, false);
 		}
 	}
 
