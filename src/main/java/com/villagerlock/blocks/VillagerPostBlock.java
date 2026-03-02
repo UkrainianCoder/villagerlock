@@ -113,7 +113,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 			return;
 		}
 
-		if (!postBlockEntity.isOccupied() && entity.getVehicle() == null && (entity instanceof VillagerEntity || entity instanceof ZombieVillagerEntity)) {
+		if (!postBlockEntity.isOccupied() && !postBlockEntity.isEntityAlreadyOnPost(entity) && entity.getVehicle() == null && (entity instanceof VillagerEntity || entity instanceof ZombieVillagerEntity)) {
 			postBlockEntity.seat(world, entity);
 		}
 	}
