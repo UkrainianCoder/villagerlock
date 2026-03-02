@@ -3,7 +3,7 @@
   "item.villager-lock.villagerpost": "Пост жителя из дуба",
 
   "block.villager-lock.villagerpost_acacia": "Пост жителя из акации",
-  "item.villager-lock.villagerpost_acacia": "По7ст жителя из акации",
+  "item.villager-lock.villagerpost_acacia": "Пост жителя из акации",
 
   "block.villager-lock.villagerpost_birch": "Пост жителя из берёзы",
   "item.villager-lock.villagerpost_birch": "Пост жителя из берёзы",
@@ -31,4 +31,5 @@
 
   "block.villager-lock.villagerpost_warped": "Искажённый пост жителя",
   "item.villager-lock.villagerpost_warped": "Искажённый пост жителя"
+
 }
