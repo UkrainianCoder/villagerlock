@@ -125,21 +125,11 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		}
 	}
 
-	public boolean isEntityAlreadyOnPost(Entity entity) {
-		if (entity.hasNoGravity()) {
-			return true;
-		}
-
-		return entity.getCommandTags().contains("locked_on_post");
-	}
-
 	public void seat(World world, Entity entity) {
 		if (!isOccupied() && !world.isReceivingRedstonePower(pos)) {
 			_entityUuid = entity.getUuid();
-			entity.addCommandTag("locked_on_post");
 			freezeEntity(entity);
 			markDirty();
-			world.updateListeners(pos, getCachedState(), getCachedState(), 3);
 			LOGGER.info("Seated {} on {}", _entityUuid, pos);
 		}
 	}
@@ -151,13 +141,11 @@ public class VillagerPostBlockEntity extends BlockEntity {
 			Entity rider = world.getEntity(_entityUuid);
 
 			if (rider != null) {
-				rider.removeCommandTag("locked_on_post");
 				unfreezeEntity(rider);
 			}
 
 			_entityUuid = null;
 			markDirty();
-			world.updateListeners(pos, getCachedState(), getCachedState(), 3);
 		}
 	}
 
