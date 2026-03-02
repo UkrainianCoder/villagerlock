@@ -2,7 +2,7 @@
 <img src=".github/assets/preview.png">
 </p>
 
-![Mod Loader](https://img.shields.io/badge/Mod_Loader-Fabric-f0eddb?style=flat-square)
+[![Mod Loader](https://img.shields.io/badge/Mod_Loader-Fabric-f0eddb?style=flat-square)](https://fabricmc.net/)
 ![Environment](https://img.shields.io/badge/Environment-Server_%26_Client-green?style=flat-square)
 
 # ✨ Villager Lock
