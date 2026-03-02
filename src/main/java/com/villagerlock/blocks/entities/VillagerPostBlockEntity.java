@@ -14,7 +14,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import org.jspecify.annotations.Nullable;
 
 import java.util.UUID;
 
@@ -30,26 +29,20 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		super(VILLAGER_POST_ENTITY, pos, state);
 	}
 
+	public static boolean isEntityOnPost(Entity entity) {
+		if (entity.hasNoGravity()) {
+			return true;
+		}
+
+		return entity.getCommandTags().contains("locked_on_post");
+	}
+
 	public boolean isOccupied() {
 		return _entityUuid != null;
 	}
 
 	public UUID getEntityUuid() {
 		return _entityUuid;
-	}
-
-	public @Nullable Entity getEntity(World world) {
-		if (isOccupied()) {
-			Entity rider = world.getEntity(_entityUuid);
-			if (rider == null || !rider.isAlive()) {
-				unseat(world);
-				return null;
-			}
-
-			return rider;
-		}
-
-		return null;
 	}
 
 	private void freezeEntity(Entity entity) {
@@ -89,7 +82,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		entity.velocityDirty = true;
 	}
 
-	private void unfreezeEntity(Entity entity) {
+	private void unfreezeEntity(Entity entity, boolean teleportToFreeBlock) {
 		entity.setNoGravity(false);
 
 		if (entity instanceof LivingEntity living) {
@@ -128,24 +121,27 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	public void seat(World world, Entity entity) {
 		if (!isOccupied() && !world.isReceivingRedstonePower(pos)) {
 			_entityUuid = entity.getUuid();
+			entity.addCommandTag("locked_on_post");
 			freezeEntity(entity);
 			markDirty();
-			LOGGER.info("Seated {} on {}", _entityUuid, pos);
+			world.updateListeners(pos, getCachedState(), getCachedState(), 3);
+			LOGGER.info("Seat entity {} on post block {}", _entityUuid, pos);
 		}
 	}
 
-	public void unseat(World world) {
+	public void unseat(World world, boolean teleportToFreeBlock) {
 		if (isOccupied()) {
-			LOGGER.info("Unseated {} on {}", _entityUuid, pos);
+			LOGGER.info("Unseat entity {} on post block {}", _entityUuid, pos);
 
 			Entity rider = world.getEntity(_entityUuid);
-
 			if (rider != null) {
-				unfreezeEntity(rider);
+				rider.removeCommandTag("locked_on_post");
+				unfreezeEntity(rider, teleportToFreeBlock);
 			}
 
 			_entityUuid = null;
 			markDirty();
+			world.updateListeners(pos, getCachedState(), getCachedState(), 3);
 		}
 	}
 

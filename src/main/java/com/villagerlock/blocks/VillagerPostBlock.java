@@ -83,7 +83,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 					if (blockEntity.isOccupied()) {
 						Entity rider = tickerWorld.getEntity(blockEntity.getEntityUuid());
 						if (rider == null) {
-							blockEntity.unseat(world);
+							blockEntity.unseat(world, false);
 						}
 					}
 				}
@@ -97,7 +97,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof VillagerPostBlockEntity postBlockEntity) {
-			postBlockEntity.unseat(world);
+			postBlockEntity.unseat(world, true);
 		}
 
 		return super.onBreak(world, pos, state, player);
@@ -114,7 +114,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 			return;
 		}
 
-		if (!postBlockEntity.isOccupied() && entity.getVehicle() == null && entity instanceof LivingEntity livingEntity && !livingEntity.isSleeping() && (entity instanceof VillagerEntity || entity instanceof ZombieVillagerEntity)) {
+		if (!postBlockEntity.isOccupied() && !VillagerPostBlockEntity.isEntityOnPost(entity) && entity.getVehicle() == null && entity instanceof LivingEntity livingEntity && !livingEntity.isSleeping() && (entity instanceof VillagerEntity || entity instanceof ZombieVillagerEntity)) {
 			postBlockEntity.seat(world, entity);
 		}
 	}
@@ -124,7 +124,7 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 		if (!world.isClient()) {
 			boolean hasSignal = world.isReceivingRedstonePower(pos);
 			if (hasSignal && world.getBlockEntity(pos) instanceof VillagerPostBlockEntity post && post.isOccupied()) {
-				post.unseat(world);
+				post.unseat(world, true);
 			}
 
 			if (hasSignal != state.get(Properties.POWERED)) {
