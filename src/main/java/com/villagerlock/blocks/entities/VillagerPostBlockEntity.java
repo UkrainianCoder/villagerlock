@@ -24,16 +24,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	public VillagerPostBlockEntity(BlockPos pos, BlockState state) {
 		super(VILLAGER_POST_ENTITY, pos, state);
 	}
-
-	public static void onTick(World world, VillagerPostBlockEntity blockEntity) {
-		if (blockEntity.isOccupied()) {
-			Entity rider = world.getEntity(blockEntity.getEntityUuid());
-			if (rider == null) {
-				blockEntity.unseat(world);
-			}
-		}
-	}
-
+	
 	public boolean isOccupied() {
 		return _entityUuid != null;
 	}

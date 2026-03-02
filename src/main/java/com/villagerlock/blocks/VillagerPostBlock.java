@@ -75,9 +75,14 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
 		if (!world.isClient() && type == ModBlocks.VILLAGER_POST_ENTITY) {
-			return (w, pos, s, be) -> {
-				if (be instanceof VillagerPostBlockEntity post) {
-					VillagerPostBlockEntity.onTick(w, post);
+			return (tickerWorld, tickerPos, tickerState, customEntity) -> {
+				if (customEntity instanceof VillagerPostBlockEntity blockEntity) {
+					if (blockEntity.isOccupied()) {
+						Entity rider = tickerWorld.getEntity(blockEntity.getEntityUuid());
+						if (rider == null) {
+							blockEntity.unseat(world);
+						}
+					}
 				}
 			};
 		}
