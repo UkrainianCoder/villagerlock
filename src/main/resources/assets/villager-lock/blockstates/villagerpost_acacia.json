@@ -1,1 +1,9 @@
-{ "variants": {"": { "model": "villager-lock:block/villagerpost_acacia" }} }
+{
+  "multipart": [
+    { "apply": { "model": "villager-lock:block/villagerpost_acacia" }},
+    {
+      "when": { "powered": "true" },
+      "apply": { "model": "villager-lock:block/villagerpost_on" }
+    }
+  ]
+}
