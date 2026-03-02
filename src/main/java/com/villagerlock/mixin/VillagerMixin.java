@@ -58,16 +58,16 @@ public class VillagerMixin {
 	private static VillagerPostBlockEntity getVillagerPostEntity(VillagerEntity villager) {
 		World world = villager.getEntityWorld();
 		BlockPos pos = villager.getBlockPos();
-		BlockEntity blockEntity = world.getBlockEntity(pos);
+		BlockPos[] adjacentPositions = new BlockPos[]{
+				pos,
+				pos.down()
+		};
 
-		if (blockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && post.getEntityUuid() == villager.getUuid()) {
-			return post;
-		}
-
-		BlockPos belowPos = pos.down();
-		BlockEntity belowBlockEntity = world.getBlockEntity(belowPos);
-		if (belowBlockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && post.getEntityUuid() == villager.getUuid()) {
-			return post;
+		for (BlockPos adjacent : adjacentPositions) {
+			BlockEntity blockEntity = world.getBlockEntity(adjacent);
+			if (blockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && villager.getUuid().equals(post.getEntityUuid())) {
+				return post;
+			}
 		}
 
 		return null;
