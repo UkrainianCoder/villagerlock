@@ -53,13 +53,15 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 		super(settings);
 		this.setDefaultState(this.stateManager.getDefaultState()
 				.with(Properties.WATERLOGGED, false)
-				.with(Properties.FACING, Direction.NORTH));
+				.with(Properties.FACING, Direction.NORTH)
+				.with(Properties.POWERED, false));
 	}
 
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
 		builder.add(Properties.WATERLOGGED);
 		builder.add(Properties.FACING);
+		builder.add(Properties.POWERED);
 	}
 
 	@Override
@@ -123,6 +125,10 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 			if (hasSignal && world.getBlockEntity(pos) instanceof VillagerPostBlockEntity post && post.isOccupied()) {
 				post.unseat(world);
 			}
+
+			if (hasSignal != state.get(Properties.POWERED)) {
+				world.setBlockState(pos, state.with(Properties.POWERED, hasSignal), 3);
+			}
 		}
 	}
 
@@ -142,7 +148,9 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState().with(Properties.FACING, ctx.getHorizontalPlayerFacing().getOpposite());
+		return this.getDefaultState()
+				.with(Properties.FACING, ctx.getHorizontalPlayerFacing().getOpposite())
+				.with(Properties.POWERED, ctx.getWorld().isReceivingRedstonePower(ctx.getBlockPos()));
 	}
 
 	@Override
