@@ -3,6 +3,7 @@
 	"package": "com.villagerlock.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
+		"MobEntityMixin",
 		"VillagerMixin"
 	],
 	"injectors": {
