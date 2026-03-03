@@ -72,7 +72,7 @@ jobs:
               uses: softprops/action-gh-release@v2
               with:
                 tag_name: ${{ steps.tags.outputs.LAST_TAG }}
-                name: Release ${{ steps.tags.outputs.LAST_TAG }}
+                name: ${{ steps.tags.outputs.LAST_TAG }}
                 body_path: release_body.md
                 files: build/libs/*
                 prerelease: ${{ contains(steps.tags.outputs.LAST_TAG, '-beta') || contains(steps.tags.outputs.LAST_TAG, '-alpha') }}
