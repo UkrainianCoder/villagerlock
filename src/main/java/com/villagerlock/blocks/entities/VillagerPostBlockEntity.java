@@ -82,38 +82,22 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		entity.velocityDirty = true;
 	}
 
-	private void unfreezeEntity(Entity entity, boolean teleportToFreeBlock) {
+	private void unfreezeEntity(Entity entity, boolean spawnAboveBlock) {
 		entity.setNoGravity(false);
 
 		if (entity instanceof LivingEntity living) {
-			BlockPos startPos = living.getBlockPos();
-			World world = living.getEntityWorld();
 			EntityAttributeInstance attribute = living.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
 
 			if (attribute != null) {
 				attribute.setBaseValue(0.0);
 			}
 
-			for (int r = 0; r <= MAX_RADIUS; r++) {
-				for (int dy = -r; dy <= r; dy++) {
-					for (int dx = -r; dx <= r; dx++) {
-						for (int dz = -r; dz <= r; dz++) {
-							if (Math.abs(dx) != r && Math.abs(dy) != r && Math.abs(dz) != r && r != 0) {
-								continue;
-							}
-
-							BlockPos targetPos = startPos.add(dx, dy, dz);
-							if (world.isAir(targetPos) && world.isAir(targetPos.up()) && world.getBlockState(targetPos.down()).isSolidBlock(world, targetPos.down())) {
-								double finalX = targetPos.getX() + 0.5;
-								double finalY = targetPos.getY();
-								double finalZ = targetPos.getZ() + 0.5;
-								living.requestTeleport(finalX, finalY, finalZ);
-								living.setVelocity(0, 0, 0);
-								return;
-							}
-						}
-					}
-				}
+			if (spawnAboveBlock) {
+				double spawnX = pos.getX() + 0.5;
+				double spawnY = pos.getY() + 0.5;
+				double spawnZ = pos.getZ() + 0.5;
+				living.requestTeleport(spawnX, spawnY, spawnZ);
+				living.setVelocity(0, 0, 0);
 			}
 		}
 	}
@@ -134,9 +118,10 @@ public class VillagerPostBlockEntity extends BlockEntity {
 			LOGGER.info("Unseat entity {} on post block {}", _entityUuid, pos);
 
 			Entity rider = world.getEntity(_entityUuid);
+
 			if (rider != null) {
 				rider.removeCommandTag("locked_on_post");
-				unfreezeEntity(rider, teleportToFreeBlock);
+				unfreezeEntity(rider, true);
 			}
 
 			_entityUuid = null;
@@ -167,4 +152,3 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		view.putString("EntityUuid", "");
 	}
 }
-
