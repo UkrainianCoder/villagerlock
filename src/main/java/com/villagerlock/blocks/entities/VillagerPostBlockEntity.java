@@ -121,7 +121,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 
 			if (rider != null) {
 				rider.removeCommandTag("locked_on_post");
-				unfreezeEntity(rider, true);
+				unfreezeEntity(rider, teleportToFreeBlock);
 			}
 
 			_entityUuid = null;
