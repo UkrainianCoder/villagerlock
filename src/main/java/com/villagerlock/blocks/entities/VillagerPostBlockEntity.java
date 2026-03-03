@@ -94,7 +94,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 
 			if (spawnAboveBlock) {
 				double spawnX = pos.getX() + 0.5;
-				double spawnY = pos.getY() + 0.5;
+				double spawnY = pos.getY() + 0.2;
 				double spawnZ = pos.getZ() + 0.5;
 				living.requestTeleport(spawnX, spawnY, spawnZ);
 				living.setVelocity(0, 0, 0);
