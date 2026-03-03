@@ -1,15 +1,1 @@
-# Default owner
 * @UkrainianCoder @xiader-45
-
-# Backend and build system
-/src/main/java/** @UkrainianCoder
-/gradle/** @UkrainianCoder
-/*.gradle @UkrainianCoder
-/gradle.properties @UkrainianCoder
-/gradlew @UkrainianCoder
-/gradlew.bat @UkrainianCoder
-/.github/workflows/** @UkrainianCoder
-
-# Resources and repository assets
-/src/main/resources/** @xiader-45
-/.github/assets/** @xiader-45
