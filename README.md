@@ -4,6 +4,9 @@
 
 [![Mod Loader](https://img.shields.io/badge/Mod_Loader-Fabric-f0eddb?style=flat-square)](https://fabricmc.net/)
 ![Environment](https://img.shields.io/badge/Environment-Server_%26_Client-green?style=flat-square)
+[![GitHub](https://img.shields.io/badge/Source-GitHub-181717?style=flat-square&logo=github)](https://github.com/UkrainianCoder/villagerlock)
+[![Modrinth](https://img.shields.io/badge/VillagerLock-Modrinth-00AF5C?style=flat-square&logo=modrinth)](https://modrinth.com/mod/villagerlock)
+[![CurseForge](https://img.shields.io/badge/VillagerLock-CurseForge-f38231?style=flat-square&logo=curseforge)](https://www.curseforge.com/minecraft/mc-mods/villager-lock)
 
 # ✨Take Full Control of Your Trading Hall!
 A vanilla-like **Fabric** mod for Minecraft 1.21.11 that adds **Villager Post** to help you manage your trading halls with style and precision.
