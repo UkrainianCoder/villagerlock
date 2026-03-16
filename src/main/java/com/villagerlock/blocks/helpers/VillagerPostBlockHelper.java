@@ -1,12 +1,13 @@
 package com.villagerlock.blocks.helpers;
 
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
+
+import java.util.UUID;
 
 public class VillagerPostBlockHelper {
 	public static VillagerPostBlockEntity getVillagerPostEntity(ZombieVillager zombieVilliager) {

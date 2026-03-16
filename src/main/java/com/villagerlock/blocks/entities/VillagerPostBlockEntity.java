@@ -1,6 +1,5 @@
 package com.villagerlock.blocks.entities;
 
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +14,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.UUID;
 
 import static com.villagerlock.ModBlocks.VILLAGER_POST_ENTITY;
 import static com.villagerlock.VillagerLock.LOGGER;
