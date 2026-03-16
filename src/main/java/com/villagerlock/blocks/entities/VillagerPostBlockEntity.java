@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 
@@ -45,6 +46,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		return _entityUuid;
 	}
 
+	@SuppressWarnings("resource")
 	private void freezeEntity(Entity entity) {
 		BlockState state = entity.level().getBlockState(worldPosition);
 		Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) ? state.getValue(BlockStateProperties.HORIZONTAL_FACING) : Direction.NORTH;
@@ -131,7 +133,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void loadAdditional(ValueInput view) {
+	protected void loadAdditional(@NonNull ValueInput view) {
 		super.loadAdditional(view);
 
 		String entityUuidStr = view.getStringOr("EntityUuid", "");
@@ -141,7 +143,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	@Override
-	protected void saveAdditional(ValueOutput view) {
+	protected void saveAdditional(@NonNull ValueOutput view) {
 		super.saveAdditional(view);
 
 		if (isOccupied()) {

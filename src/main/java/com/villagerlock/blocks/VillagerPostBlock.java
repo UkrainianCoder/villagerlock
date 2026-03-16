@@ -34,6 +34,7 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
 public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, SimpleWaterloggedBlock {
@@ -68,17 +69,17 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+	public @NonNull VoxelShape getShape(@NonNull BlockState state, @NonNull BlockGetter world, @NonNull BlockPos pos, @NonNull CollisionContext context) {
 		return SHAPE;
 	}
 
 	@Override
-	public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(@NonNull BlockPos pos, @NonNull BlockState state) {
 		return new VillagerPostBlockEntity(pos, state);
 	}
 
 	@Override
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, @NonNull BlockState state, @NonNull BlockEntityType<T> type) {
 		if (!world.isClientSide() && type == ModBlocks.VILLAGER_POST_ENTITY) {
 			return (tickerWorld, tickerPos, tickerState, customEntity) -> {
 				if (customEntity instanceof VillagerPostBlockEntity blockEntity) {
@@ -96,7 +97,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+	public @NonNull BlockState playerWillDestroy(Level world, @NonNull BlockPos pos, @NonNull BlockState state, @NonNull Player player) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof VillagerPostBlockEntity postBlockEntity) {
 			postBlockEntity.unseat(world, true);
@@ -106,7 +107,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	protected void entityInside(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier handler, boolean bool) {
+	protected void entityInside(@NonNull BlockState state, Level world, @NonNull BlockPos pos, @NonNull Entity entity, @NonNull InsideBlockEffectApplier handler, boolean bool) {
 		if (world.isClientSide()) {
 			return;
 		}
@@ -122,7 +123,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block sourceBlock, Orientation wireOrientation, boolean notify) {
+	public void neighborChanged(@NonNull BlockState state, Level world, @NonNull BlockPos pos, @NonNull Block sourceBlock, Orientation wireOrientation, boolean notify) {
 		if (!world.isClientSide()) {
 			boolean hasSignal = world.hasNeighborSignal(pos);
 			if (hasSignal && world.getBlockEntity(pos) instanceof VillagerPostBlockEntity post && post.isOccupied()) {
@@ -136,12 +137,12 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState state) {
+	public @NonNull FluidState getFluidState(BlockState state) {
 		return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
 	}
 
 	@Override
-	public BlockState updateShape(BlockState state, LevelReader world, ScheduledTickAccess tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random) {
+	public @NonNull BlockState updateShape(BlockState state, @NonNull LevelReader world, @NonNull ScheduledTickAccess tickView, @NonNull BlockPos pos, @NonNull Direction direction, @NonNull BlockPos neighborPos, @NonNull BlockState neighborState, @NonNull RandomSource random) {
 		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
 			tickView.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 		}
@@ -157,22 +158,22 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	protected MapCodec<? extends BaseEntityBlock> codec() {
-		return null;
+	protected @NonNull MapCodec<? extends BaseEntityBlock> codec() {
+		return MapCodec.unit(this);
 	}
 
 	@Override
-	public @Nullable <T extends BlockEntity> GameEventListener getListener(ServerLevel world, T blockEntity) {
+	public @Nullable <T extends BlockEntity> GameEventListener getListener(@NonNull ServerLevel world, T blockEntity) {
 		return super.getListener(world, blockEntity);
 	}
 
 	@Override
-	public BlockState getAppearance(BlockState state, BlockAndTintGetter renderView, BlockPos pos, Direction side, @Nullable BlockState sourceState, @Nullable BlockPos sourcePos) {
+	public @NonNull BlockState getAppearance(@NonNull BlockState state, @NonNull BlockAndTintGetter renderView, @NonNull BlockPos pos, @NonNull Direction side, @Nullable BlockState sourceState, @Nullable BlockPos sourcePos) {
 		return super.getAppearance(state, renderView, pos, side, sourceState, sourcePos);
 	}
 
 	@Override
-	public boolean isEnabled(FeatureFlagSet enabledFeatures) {
+	public boolean isEnabled(@NonNull FeatureFlagSet enabledFeatures) {
 		return super.isEnabled(enabledFeatures);
 	}
 }

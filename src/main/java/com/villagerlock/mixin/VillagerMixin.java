@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Mixin(Villager.class)
 public class VillagerMixin {
@@ -132,7 +133,9 @@ public class VillagerMixin {
 	@Unique
 	private static void onNonZeroExperience(ServerLevel world, Villager villager) {
 		Brain<Villager> brain = villager.getBrain();
-		if (brain.getMemoryInternal(MemoryModuleType.JOB_SITE).isEmpty()) {
+		Optional<GlobalPos> memoryInternal = brain.getMemoryInternal(MemoryModuleType.JOB_SITE);
+
+		if (Optional.ofNullable(memoryInternal).orElse(Optional.empty()).isEmpty()) {
 			Object[] result = findProfessionBlock(world, villager);
 			if (result != null) {
 				BlockPos professionBlockPos = (BlockPos) result[0];
@@ -147,6 +150,7 @@ public class VillagerMixin {
 	}
 
 	@Inject(method = "tick", at = @At("TAIL"))
+	@SuppressWarnings("resource")
 	private void onTick(CallbackInfo ci) {
 		Villager villager = (Villager) (Object) this;
 		if (!(villager.level() instanceof ServerLevel world) || world.getGameTime() % 10 != 0) {

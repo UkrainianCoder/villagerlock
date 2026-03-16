@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Mob.class)
 public abstract class MobEntityMixin {
 	@Inject(method = "convertTo*", at = @At("HEAD"))
+	@SuppressWarnings("resource")
 	private void onConverted(CallbackInfoReturnable<Mob> cir) {
 		Mob oldEntity = (Mob) (Object) this;
 		if (oldEntity.level().isClientSide()) {

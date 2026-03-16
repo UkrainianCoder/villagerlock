@@ -86,18 +86,18 @@ public class ModBlocks {
 		return block;
 	}
 
+	@SuppressWarnings("SameParameterValue")
 	private static <T extends Block> Item register(Identifier id, ResourceKey<CreativeModeTab> group, Block block, Item.Properties itemSettings) {
 		ResourceKey<Item> itemKey = ResourceKey.create(BuiltInRegistries.ITEM.key(), id);
 		Item item = new BlockItem(block, itemSettings.setId(itemKey));
 		Registry.register(BuiltInRegistries.ITEM, id, item);
-		ItemGroupEvents.modifyEntriesEvent(group).register((itemGroup) -> {
-			itemGroup.accept(item);
-		});
+		ItemGroupEvents.modifyEntriesEvent(group).register(itemGroup -> itemGroup.accept(item));
 
 		LOGGER.info("Registered item with ID: {}", id);
 		return item;
 	}
 
+	@SuppressWarnings("EmptyMethod")
 	public static void initialize() {
 	}
 
