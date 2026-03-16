@@ -3,7 +3,7 @@ package com.villagerlock.blocks;
 import com.mojang.serialization.MapCodec;
 import com.villagerlock.ModBlocks;
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
-import net.minecraft.world.level.block.*;
+import net.minecraft.block.*;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
