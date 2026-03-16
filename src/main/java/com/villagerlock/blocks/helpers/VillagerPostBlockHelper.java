@@ -1,31 +1,31 @@
 package com.villagerlock.blocks.helpers;
 
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.mob.ZombieVillagerEntity;
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.UUID;
 
 public class VillagerPostBlockHelper {
-	public static VillagerPostBlockEntity getVillagerPostEntity(ZombieVillagerEntity zombieVilliager) {
-		World world = zombieVilliager.getEntityWorld();
-		BlockPos pos = zombieVilliager.getBlockPos();
-		return getVillagerPostEntity(world, pos, zombieVilliager.getUuid());
+	public static VillagerPostBlockEntity getVillagerPostEntity(ZombieVillager zombieVilliager) {
+		Level world = zombieVilliager.level();
+		BlockPos pos = zombieVilliager.blockPosition();
+		return getVillagerPostEntity(world, pos, zombieVilliager.getUUID());
 	}
 
-	public static VillagerPostBlockEntity getVillagerPostEntity(VillagerEntity villager) {
-		World world = villager.getEntityWorld();
-		BlockPos pos = villager.getBlockPos();
-		return getVillagerPostEntity(world, pos, villager.getUuid());
+	public static VillagerPostBlockEntity getVillagerPostEntity(Villager villager) {
+		Level world = villager.level();
+		BlockPos pos = villager.blockPosition();
+		return getVillagerPostEntity(world, pos, villager.getUUID());
 	}
 
-	public static VillagerPostBlockEntity getVillagerPostEntity(World world, BlockPos pos, UUID uuid) {
+	public static VillagerPostBlockEntity getVillagerPostEntity(Level world, BlockPos pos, UUID uuid) {
 		BlockPos[] adjacentPositions = new BlockPos[]{
 				pos,
-				pos.down()
+				pos.below()
 		};
 
 		for (BlockPos adjacent : adjacentPositions) {

@@ -3,86 +3,89 @@ package com.villagerlock.blocks;
 import com.mojang.serialization.MapCodec;
 import com.villagerlock.ModBlocks;
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
-import net.minecraft.block.*;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCollisionHandler;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.ZombieVillagerEntity;
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.resource.featuretoggle.FeatureSet;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockRenderView;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
-import net.minecraft.world.block.WireOrientation;
-import net.minecraft.world.event.listener.GameEventListener;
-import net.minecraft.world.tick.ScheduledTickView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.zombie.ZombieVillager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.gameevent.GameEventListener;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
-public class VillagerPostBlock extends BlockWithEntity implements BlockEntityProvider, Waterloggable {
+public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, SimpleWaterloggedBlock {
 	private static final VoxelShape SHAPE;
 
 	static {
-		VoxelShape part1 = Block.createCuboidShape(12, 0, 0, 16, 3, 4);
-		VoxelShape part2 = Block.createCuboidShape(12, 0, 12, 16, 3, 16);
-		VoxelShape part3 = Block.createCuboidShape(0, 0, 0, 4, 3, 4);
-		VoxelShape part4 = Block.createCuboidShape(0, 0, 12, 4, 3, 16);
-		VoxelShape part5 = Block.createCuboidShape(13, 0, 4, 16, 2, 12);
-		VoxelShape part6 = Block.createCuboidShape(4, 0, 13, 12, 2, 16);
-		VoxelShape part7 = Block.createCuboidShape(0, 0, 4, 3, 2, 12);
-		VoxelShape part8 = Block.createCuboidShape(4, 0, 0, 12, 2, 3);
-		VoxelShape part9 = Block.createCuboidShape(3, 0, 3, 13, 1, 13);
-		SHAPE = VoxelShapes.union(part1, part2, part3, part4, part5, part6, part7, part8, part9);
+		VoxelShape part1 = Block.box(12, 0, 0, 16, 3, 4);
+		VoxelShape part2 = Block.box(12, 0, 12, 16, 3, 16);
+		VoxelShape part3 = Block.box(0, 0, 0, 4, 3, 4);
+		VoxelShape part4 = Block.box(0, 0, 12, 4, 3, 16);
+		VoxelShape part5 = Block.box(13, 0, 4, 16, 2, 12);
+		VoxelShape part6 = Block.box(4, 0, 13, 12, 2, 16);
+		VoxelShape part7 = Block.box(0, 0, 4, 3, 2, 12);
+		VoxelShape part8 = Block.box(4, 0, 0, 12, 2, 3);
+		VoxelShape part9 = Block.box(3, 0, 3, 13, 1, 13);
+		SHAPE = Shapes.or(part1, part2, part3, part4, part5, part6, part7, part8, part9);
 	}
 
-	public VillagerPostBlock(AbstractBlock.Settings settings) {
+	public VillagerPostBlock(BlockBehaviour.Properties settings) {
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState()
-				.with(Properties.WATERLOGGED, false)
-				.with(Properties.FACING, Direction.NORTH)
-				.with(Properties.POWERED, false));
+		this.registerDefaultState(this.stateDefinition.any()
+				.setValue(BlockStateProperties.WATERLOGGED, false)
+				.setValue(BlockStateProperties.FACING, Direction.NORTH)
+				.setValue(BlockStateProperties.POWERED, false));
 	}
 
 	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-		builder.add(Properties.WATERLOGGED);
-		builder.add(Properties.FACING);
-		builder.add(Properties.POWERED);
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+		builder.add(BlockStateProperties.WATERLOGGED);
+		builder.add(BlockStateProperties.FACING);
+		builder.add(BlockStateProperties.POWERED);
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public @NonNull VoxelShape getShape(@NonNull BlockState state, @NonNull BlockGetter world, @NonNull BlockPos pos, @NonNull CollisionContext context) {
 		return SHAPE;
 	}
 
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+	public BlockEntity newBlockEntity(@NonNull BlockPos pos, @NonNull BlockState state) {
 		return new VillagerPostBlockEntity(pos, state);
 	}
 
 	@Override
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-		if (!world.isClient() && type == ModBlocks.VILLAGER_POST_ENTITY) {
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, @NonNull BlockState state, @NonNull BlockEntityType<T> type) {
+		if (!world.isClientSide() && type == ModBlocks.VILLAGER_POST_ENTITY) {
 			return (tickerWorld, tickerPos, tickerState, customEntity) -> {
 				if (customEntity instanceof VillagerPostBlockEntity blockEntity) {
 					if (blockEntity.isOccupied()) {
 						Entity rider = tickerWorld.getEntity(blockEntity.getEntityUuid());
-						if (rider == null || rider.squaredDistanceTo(tickerPos.getX() + 0.5, tickerPos.getY(), tickerPos.getZ() + 0.5) > 2.0D) {
+						if (rider == null || rider.distanceToSqr(tickerPos.getX() + 0.5, tickerPos.getY(), tickerPos.getZ() + 0.5) > 2.0D) {
 							blockEntity.unseat(tickerWorld, false);
 						}
 					}
@@ -94,18 +97,18 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 	}
 
 	@Override
-	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+	public @NonNull BlockState playerWillDestroy(Level world, @NonNull BlockPos pos, @NonNull BlockState state, @NonNull Player player) {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof VillagerPostBlockEntity postBlockEntity) {
 			postBlockEntity.unseat(world, true);
 		}
 
-		return super.onBreak(world, pos, state, player);
+		return super.playerWillDestroy(world, pos, state, player);
 	}
 
 	@Override
-	protected void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, EntityCollisionHandler handler, boolean bool) {
-		if (world.isClient()) {
+	protected void entityInside(@NonNull BlockState state, Level world, @NonNull BlockPos pos, @NonNull Entity entity, @NonNull InsideBlockEffectApplier handler, boolean bool) {
+		if (world.isClientSide()) {
 			return;
 		}
 
@@ -114,63 +117,63 @@ public class VillagerPostBlock extends BlockWithEntity implements BlockEntityPro
 			return;
 		}
 
-		if (!postBlockEntity.isOccupied() && !VillagerPostBlockEntity.isEntityOnPost(entity) && entity.getVehicle() == null && entity instanceof LivingEntity livingEntity && !livingEntity.isSleeping() && (entity instanceof VillagerEntity || entity instanceof ZombieVillagerEntity)) {
+		if (!postBlockEntity.isOccupied() && !VillagerPostBlockEntity.isEntityOnPost(entity) && entity.getVehicle() == null && entity instanceof LivingEntity livingEntity && !livingEntity.isSleeping() && (entity instanceof Villager || entity instanceof ZombieVillager)) {
 			postBlockEntity.seat(world, entity);
 		}
 	}
 
 	@Override
-	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, WireOrientation wireOrientation, boolean notify) {
-		if (!world.isClient()) {
-			boolean hasSignal = world.isReceivingRedstonePower(pos);
+	public void neighborChanged(@NonNull BlockState state, Level world, @NonNull BlockPos pos, @NonNull Block sourceBlock, Orientation wireOrientation, boolean notify) {
+		if (!world.isClientSide()) {
+			boolean hasSignal = world.hasNeighborSignal(pos);
 			if (hasSignal && world.getBlockEntity(pos) instanceof VillagerPostBlockEntity post && post.isOccupied()) {
 				post.unseat(world, true);
 			}
 
-			if (hasSignal != state.get(Properties.POWERED)) {
-				world.setBlockState(pos, state.with(Properties.POWERED, hasSignal), 3);
+			if (hasSignal != state.getValue(BlockStateProperties.POWERED)) {
+				world.setBlock(pos, state.setValue(BlockStateProperties.POWERED, hasSignal), 3);
 			}
 		}
 	}
 
 	@Override
-	public FluidState getFluidState(BlockState state) {
-		return state.get(Properties.WATERLOGGED) ? Fluids.WATER.getStill(false) : super.getFluidState(state);
+	public @NonNull FluidState getFluidState(BlockState state) {
+		return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
 	}
 
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, WorldView world, ScheduledTickView tickView, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, Random random) {
-		if (state.get(Properties.WATERLOGGED)) {
-			tickView.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+	public @NonNull BlockState updateShape(BlockState state, @NonNull LevelReader world, @NonNull ScheduledTickAccess tickView, @NonNull BlockPos pos, @NonNull Direction direction, @NonNull BlockPos neighborPos, @NonNull BlockState neighborState, @NonNull RandomSource random) {
+		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
+			tickView.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(world));
 		}
 
-		return super.getStateForNeighborUpdate(state, world, tickView, pos, direction, neighborPos, neighborState, random);
+		return super.updateShape(state, world, tickView, pos, direction, neighborPos, neighborState, random);
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return this.getDefaultState()
-				.with(Properties.FACING, ctx.getHorizontalPlayerFacing().getOpposite())
-				.with(Properties.POWERED, ctx.getWorld().isReceivingRedstonePower(ctx.getBlockPos()));
+	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+		return this.defaultBlockState()
+				.setValue(BlockStateProperties.FACING, ctx.getHorizontalDirection().getOpposite())
+				.setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
 	}
 
 	@Override
-	protected MapCodec<? extends BlockWithEntity> getCodec() {
-		return null;
+	protected @NonNull MapCodec<? extends BaseEntityBlock> codec() {
+		return MapCodec.unit(this);
 	}
 
 	@Override
-	public @Nullable <T extends BlockEntity> GameEventListener getGameEventListener(ServerWorld world, T blockEntity) {
-		return super.getGameEventListener(world, blockEntity);
+	public @Nullable <T extends BlockEntity> GameEventListener getListener(@NonNull ServerLevel world, T blockEntity) {
+		return super.getListener(world, blockEntity);
 	}
 
 	@Override
-	public BlockState getAppearance(BlockState state, BlockRenderView renderView, BlockPos pos, Direction side, @Nullable BlockState sourceState, @Nullable BlockPos sourcePos) {
+	public @NonNull BlockState getAppearance(@NonNull BlockState state, @NonNull BlockAndTintGetter renderView, @NonNull BlockPos pos, @NonNull Direction side, @Nullable BlockState sourceState, @Nullable BlockPos sourcePos) {
 		return super.getAppearance(state, renderView, pos, side, sourceState, sourcePos);
 	}
 
 	@Override
-	public boolean isEnabled(FeatureSet enabledFeatures) {
+	public boolean isEnabled(@NonNull FeatureFlagSet enabledFeatures) {
 		return super.isEnabled(enabledFeatures);
 	}
 }

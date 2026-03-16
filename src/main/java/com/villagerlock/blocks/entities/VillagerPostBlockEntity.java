@@ -1,19 +1,20 @@
 package com.villagerlock.blocks.entities;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.state.property.Properties;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
+import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 
@@ -30,11 +31,11 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	public static boolean isEntityOnPost(Entity entity) {
-		if (entity.hasNoGravity()) {
+		if (entity.isNoGravity()) {
 			return true;
 		}
 
-		return entity.getCommandTags().contains("locked_on_post");
+		return entity.getTags().contains("locked_on_post");
 	}
 
 	public boolean isOccupied() {
@@ -45,104 +46,105 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		return _entityUuid;
 	}
 
+	@SuppressWarnings("resource")
 	private void freezeEntity(Entity entity) {
-		BlockState state = entity.getEntityWorld().getBlockState(pos);
-		Direction facing = state.contains(Properties.HORIZONTAL_FACING) ? state.get(Properties.HORIZONTAL_FACING) : Direction.NORTH;
-		float blockYaw = facing.getPositiveHorizontalDegrees();
+		BlockState state = entity.level().getBlockState(worldPosition);
+		Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) ? state.getValue(BlockStateProperties.HORIZONTAL_FACING) : Direction.NORTH;
+		float blockYaw = facing.toYRot();
 
 		entity.setNoGravity(true);
 
 		if (entity instanceof LivingEntity living) {
-			var attribute = living.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
+			var attribute = living.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
 			if (attribute != null) {
 				attribute.setBaseValue(1.0);
 			}
 		}
 
-		if (entity instanceof MobEntity mobEntity) {
+		if (entity instanceof Mob mobEntity) {
 			mobEntity.getNavigation().stop();
-			mobEntity.setForwardSpeed(0);
-			mobEntity.setSidewaysSpeed(0);
+			mobEntity.setZza(0);
+			mobEntity.setXxa(0);
 		}
 
-		entity.setVelocity(Vec3d.ZERO);
-		entity.refreshPositionAndAngles(
-				pos.getX() + 0.5,
-				pos.getY() + 0.05,
-				pos.getZ() + 0.5,
+		entity.setDeltaMovement(Vec3.ZERO);
+		entity.snapTo(
+				worldPosition.getX() + 0.5,
+				worldPosition.getY() + 0.05,
+				worldPosition.getZ() + 0.5,
 				blockYaw,
 				0.00f
 		);
 
 		if (entity instanceof LivingEntity living) {
-			living.setHeadYaw(blockYaw);
-			living.setBodyYaw(blockYaw);
+			living.setYHeadRot(blockYaw);
+			living.setYBodyRot(blockYaw);
 		}
 
-		entity.velocityDirty = true;
+		entity.needsSync = true;
 	}
 
 	private void unfreezeEntity(Entity entity, boolean spawnAboveBlock) {
 		entity.setNoGravity(false);
 
 		if (entity instanceof LivingEntity living) {
-			EntityAttributeInstance attribute = living.getAttributeInstance(EntityAttributes.KNOCKBACK_RESISTANCE);
+			AttributeInstance attribute = living.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
 
 			if (attribute != null) {
 				attribute.setBaseValue(0.0);
 			}
 
 			if (spawnAboveBlock) {
-				double spawnX = pos.getX() + 0.5;
-				double spawnY = pos.getY() + 0.2;
-				double spawnZ = pos.getZ() + 0.5;
-				living.requestTeleport(spawnX, spawnY, spawnZ);
-				living.setVelocity(0, 0, 0);
+				double spawnX = worldPosition.getX() + 0.5;
+				double spawnY = worldPosition.getY() + 0.2;
+				double spawnZ = worldPosition.getZ() + 0.5;
+				living.teleportTo(spawnX, spawnY, spawnZ);
+				living.setDeltaMovement(0, 0, 0);
 			}
 		}
 	}
 
-	public void seat(World world, Entity entity) {
-		if (!isOccupied() && !world.isReceivingRedstonePower(pos)) {
-			_entityUuid = entity.getUuid();
-			entity.addCommandTag("locked_on_post");
+	public void seat(Level world, Entity entity) {
+		if (!isOccupied() && !world.hasNeighborSignal(worldPosition)) {
+			_entityUuid = entity.getUUID();
+			entity.addTag("locked_on_post");
 			freezeEntity(entity);
-			markDirty();
-			world.updateListeners(pos, getCachedState(), getCachedState(), 3);
-			LOGGER.info("Seat entity {} on post block {}", _entityUuid, pos);
+			setChanged();
+			world.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
+			LOGGER.info("Seat entity {} on post block {}", _entityUuid, worldPosition);
 		}
 	}
 
-	public void unseat(World world, boolean teleportToFreeBlock) {
+	public void unseat(Level world, boolean teleportToFreeBlock) {
 		if (isOccupied()) {
-			LOGGER.info("Unseat entity {} on post block {}", _entityUuid, pos);
+			LOGGER.info("Unseat entity {} on post block {}", _entityUuid, worldPosition);
 
 			Entity rider = world.getEntity(_entityUuid);
 
 			if (rider != null) {
-				rider.removeCommandTag("locked_on_post");
+				rider.removeTag("locked_on_post");
 				unfreezeEntity(rider, teleportToFreeBlock);
 			}
 
 			_entityUuid = null;
-			markDirty();
-			world.updateListeners(pos, getCachedState(), getCachedState(), 3);
+			setChanged();
+			world.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
 		}
 	}
 
 	@Override
-	protected void readData(ReadView view) {
-		super.readData(view);
+	protected void loadAdditional(@NonNull ValueInput view) {
+		super.loadAdditional(view);
 
-		String entityUuidStr = view.getString("EntityUuid", "");
+		String entityUuidStr = view.getStringOr("EntityUuid", "");
 		if (!entityUuidStr.isEmpty()) {
 			_entityUuid = UUID.fromString(entityUuidStr);
 		}
 	}
 
 	@Override
-	protected void writeData(WriteView view) {
-		super.writeData(view);
+	protected void saveAdditional(@NonNull ValueOutput view) {
+		super.saveAdditional(view);
 
 		if (isOccupied()) {
 			view.putString("EntityUuid", _entityUuid.toString());

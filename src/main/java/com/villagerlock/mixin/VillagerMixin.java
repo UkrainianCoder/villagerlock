@@ -1,21 +1,21 @@
 package com.villagerlock.mixin;
 
 import com.villagerlock.blocks.helpers.VillagerPostBlockHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.ai.brain.BlockPosLookTarget;
-import net.minecraft.entity.ai.brain.Brain;
-import net.minecraft.entity.ai.brain.MemoryModuleType;
-import net.minecraft.entity.passive.VillagerEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.GlobalPos;
-import net.minecraft.village.VillagerProfession;
-import net.minecraft.world.poi.PointOfInterestStorage;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.ai.Brain;
+import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
+import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.villager.VillagerProfession;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,11 +23,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
+import java.util.Optional;
 
-@Mixin(VillagerEntity.class)
+@Mixin(Villager.class)
 public class VillagerMixin {
 	@Unique
-	private static final Map<Block, RegistryKey<VillagerProfession>> BLOCK_PROFESSION_MAP = Map.ofEntries(
+	private static final Map<Block, ResourceKey<VillagerProfession>> BLOCK_PROFESSION_MAP = Map.ofEntries(
 			Map.entry(Blocks.SMOKER, VillagerProfession.BUTCHER),
 			Map.entry(Blocks.BREWING_STAND, VillagerProfession.CLERIC),
 			Map.entry(Blocks.BARREL, VillagerProfession.FISHERMAN),
@@ -44,7 +45,7 @@ public class VillagerMixin {
 	);
 
 	@Unique
-	private static RegistryKey<VillagerProfession> getProfessionByBlock(Block block) {
+	private static ResourceKey<VillagerProfession> getProfessionByBlock(Block block) {
 		if (block == null) {
 			return VillagerProfession.NONE;
 		}
@@ -53,8 +54,8 @@ public class VillagerMixin {
 	}
 
 	@Unique
-	private static Object[] findProfessionBlock(ServerWorld world, VillagerEntity villager) {
-		BlockPos pos = villager.getBlockPos();
+	private static Object[] findProfessionBlock(ServerLevel world, Villager villager) {
+		BlockPos pos = villager.blockPosition();
 		BlockPos[] adjacentPositions = new BlockPos[]{
 				pos.north(),
 				pos.south(),
@@ -73,46 +74,46 @@ public class VillagerMixin {
 	}
 
 	@Unique
-	private static void tryClaimProfession(ServerWorld world, VillagerEntity villager, RegistryEntry<VillagerProfession> profession, BlockPos professionPos) {
-		Brain<VillagerEntity> brain = villager.getBrain();
-		brain.forget(MemoryModuleType.JOB_SITE);
-		brain.forget(MemoryModuleType.POTENTIAL_JOB_SITE);
+	private static void tryClaimProfession(ServerLevel world, Villager villager, Holder<VillagerProfession> profession, BlockPos professionPos) {
+		Brain<Villager> brain = villager.getBrain();
+		brain.eraseMemory(MemoryModuleType.JOB_SITE);
+		brain.eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
 
-		GlobalPos globalPos = GlobalPos.create(world.getRegistryKey(), professionPos);
-		world.getRegistryManager().getOrThrow(RegistryKeys.POINT_OF_INTEREST_TYPE)
-				.streamEntries()
+		GlobalPos globalPos = GlobalPos.of(world.dimension(), professionPos);
+		world.registryAccess().lookupOrThrow(Registries.POINT_OF_INTEREST_TYPE)
+				.listElements()
 				.findFirst()
 				.ifPresent(poiType -> {
-					PointOfInterestStorage poiStorage = world.getPointOfInterestStorage();
+					PoiManager poiStorage = world.getPoiManager();
 					if (poiStorage.getType(professionPos).isEmpty()) {
 						poiStorage.add(professionPos, poiType);
 					}
 
-					brain.remember(MemoryModuleType.POTENTIAL_JOB_SITE, globalPos);
-					brain.remember(MemoryModuleType.LOOK_TARGET, new BlockPosLookTarget(professionPos));
+					brain.setMemory(MemoryModuleType.POTENTIAL_JOB_SITE, globalPos);
+					brain.setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(professionPos));
 				});
 	}
 
 	@Unique
-	private static void tryReClaimProfession(ServerWorld world, VillagerEntity villager, RegistryEntry<VillagerProfession> profession, BlockPos professionPos) {
-		Brain<VillagerEntity> brain = villager.getBrain();
-		GlobalPos globalPos = GlobalPos.create(world.getRegistryKey(), professionPos);
-		brain.remember(MemoryModuleType.JOB_SITE, globalPos);
+	private static void tryReClaimProfession(ServerLevel world, Villager villager, Holder<VillagerProfession> profession, BlockPos professionPos) {
+		Brain<Villager> brain = villager.getBrain();
+		GlobalPos globalPos = GlobalPos.of(world.dimension(), professionPos);
+		brain.setMemory(MemoryModuleType.JOB_SITE, globalPos);
 	}
 
 	@Unique
-	private static void tryRemoveProfession(ServerWorld world, VillagerEntity villager) {
-		RegistryEntry<VillagerProfession> professionEntry = Registries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE);
-		Brain<VillagerEntity> brain = villager.getBrain();
-		brain.forget(MemoryModuleType.JOB_SITE);
-		brain.forget(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
-		brain.forget(MemoryModuleType.POTENTIAL_JOB_SITE);
-		brain.forget(MemoryModuleType.LOOK_TARGET);
+	private static void tryRemoveProfession(ServerLevel world, Villager villager) {
+		Holder<VillagerProfession> professionEntry = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE);
+		Brain<Villager> brain = villager.getBrain();
+		brain.eraseMemory(MemoryModuleType.JOB_SITE);
+		brain.eraseMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
+		brain.eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
+		brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
 		villager.setVillagerData(villager.getVillagerData().withProfession(professionEntry));
 	}
 
 	@Unique
-	private static void onZeroExperience(ServerWorld world, VillagerEntity villager) {
+	private static void onZeroExperience(ServerLevel world, Villager villager) {
 		Object[] result = findProfessionBlock(world, villager);
 
 		if (result == null) {
@@ -121,8 +122,8 @@ public class VillagerMixin {
 
 		BlockPos professionBlockPos = (BlockPos) result[0];
 		Block professionBlock = (Block) result[1];
-		RegistryEntry<VillagerProfession> currentProfession = villager.getVillagerData().profession();
-		RegistryEntry<VillagerProfession> requiredProfession = Registries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
+		Holder<VillagerProfession> currentProfession = villager.getVillagerData().profession();
+		Holder<VillagerProfession> requiredProfession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
 
 		if (currentProfession.value() != requiredProfession.value()) {
 			tryClaimProfession(world, villager, requiredProfession, professionBlockPos);
@@ -130,15 +131,17 @@ public class VillagerMixin {
 	}
 
 	@Unique
-	private static void onNonZeroExperience(ServerWorld world, VillagerEntity villager) {
-		Brain<VillagerEntity> brain = villager.getBrain();
-		if (brain.getOptionalMemory(MemoryModuleType.JOB_SITE).isEmpty()) {
+	private static void onNonZeroExperience(ServerLevel world, Villager villager) {
+		Brain<Villager> brain = villager.getBrain();
+		Optional<GlobalPos> memoryInternal = brain.getMemoryInternal(MemoryModuleType.JOB_SITE);
+
+		if (Optional.ofNullable(memoryInternal).orElse(Optional.empty()).isEmpty()) {
 			Object[] result = findProfessionBlock(world, villager);
 			if (result != null) {
 				BlockPos professionBlockPos = (BlockPos) result[0];
 				Block professionBlock = (Block) result[1];
-				RegistryEntry<VillagerProfession> currentProfession = villager.getVillagerData().profession();
-				RegistryEntry<VillagerProfession> requiredProfession = Registries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
+				Holder<VillagerProfession> currentProfession = villager.getVillagerData().profession();
+				Holder<VillagerProfession> requiredProfession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
 				if (currentProfession.value() == requiredProfession.value()) {
 					tryReClaimProfession(world, villager, currentProfession, professionBlockPos);
 				}
@@ -147,14 +150,15 @@ public class VillagerMixin {
 	}
 
 	@Inject(method = "tick", at = @At("TAIL"))
+	@SuppressWarnings("resource")
 	private void onTick(CallbackInfo ci) {
-		VillagerEntity villager = (VillagerEntity) (Object) this;
-		if (!(villager.getEntityWorld() instanceof ServerWorld world) || world.getTime() % 10 != 0) {
+		Villager villager = (Villager) (Object) this;
+		if (!(villager.level() instanceof ServerLevel world) || world.getGameTime() % 10 != 0) {
 			return;
 		}
 
 		if (VillagerPostBlockHelper.getVillagerPostEntity(villager) != null) {
-			if (villager.getExperience() > 0) {
+			if (villager.getVillagerXp() > 0) {
 				onNonZeroExperience(world, villager);
 				return;
 			}
