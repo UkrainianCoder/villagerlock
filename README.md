@@ -9,7 +9,7 @@
 [![CurseForge](https://img.shields.io/badge/VillagerLock-CurseForge-f38231?style=flat-square&logo=curseforge)](https://www.curseforge.com/minecraft/mc-mods/villager-lock)
 
 # ✨Take Full Control of Your Trading Hall!
-A vanilla-like **Fabric** mod for Minecraft 26.1 that adds **Villager Post** to help you manage your trading halls with style and precision.
+A vanilla-like **Fabric** mod for Minecraft 1.21.11 and 26.1 that adds **Villager Post** to help you manage your trading halls with style and precision.
 # 🎮 How to Use
 To ensure a villager is strictly locked to a specific block, follow these steps:
 * **Place the Post:** Set down a Villager Post in your desired location.
