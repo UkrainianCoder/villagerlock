@@ -15,7 +15,10 @@ import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.*;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
@@ -165,11 +168,6 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	@Override
 	public @Nullable <T extends BlockEntity> GameEventListener getListener(@NonNull ServerLevel world, T blockEntity) {
 		return super.getListener(world, blockEntity);
-	}
-
-	@Override
-	public @NonNull BlockState getAppearance(@NonNull BlockState state, @NonNull BlockAndTintGetter renderView, @NonNull BlockPos pos, @NonNull Direction side, @Nullable BlockState sourceState, @Nullable BlockPos sourcePos) {
-		return super.getAppearance(state, renderView, pos, side, sourceState, sourcePos);
 	}
 
 	@Override

@@ -35,7 +35,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 			return true;
 		}
 
-		return entity.getTags().contains("locked_on_post");
+		return entity.entityTags().contains("locked_on_post");
 	}
 
 	public boolean isOccupied() {
