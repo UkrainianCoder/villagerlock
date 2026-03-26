@@ -87,7 +87,7 @@ public class ModBlocks {
 	}
 
 	@SuppressWarnings("SameParameterValue")
-	private static <T extends Block> Item register(Identifier id, ResourceKey<CreativeModeTab> group, Block block, Item.Properties itemSettings) {
+	private static Item register(Identifier id, ResourceKey<CreativeModeTab> group, Block block, Item.Properties itemSettings) {
 		ResourceKey<Item> itemKey = ResourceKey.create(BuiltInRegistries.ITEM.key(), id);
 		Item item = new BlockItem(block, itemSettings.setId(itemKey));
 		Registry.register(BuiltInRegistries.ITEM, id, item);

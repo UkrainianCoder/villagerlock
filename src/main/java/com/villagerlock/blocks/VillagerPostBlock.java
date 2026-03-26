@@ -84,7 +84,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, @NonNull BlockState state, @NonNull BlockEntityType<T> type) {
 		if (!world.isClientSide() && type == ModBlocks.VILLAGER_POST_ENTITY) {
-			return (tickerWorld, tickerPos, tickerState, customEntity) -> {
+			return (tickerWorld, tickerPos, _, customEntity) -> {
 				if (customEntity instanceof VillagerPostBlockEntity blockEntity) {
 					if (blockEntity.isOccupied()) {
 						Entity rider = tickerWorld.getEntity(blockEntity.getEntityUuid());

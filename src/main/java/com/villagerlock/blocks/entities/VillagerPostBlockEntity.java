@@ -22,8 +22,6 @@ import static com.villagerlock.ModBlocks.VILLAGER_POST_ENTITY;
 import static com.villagerlock.VillagerLock.LOGGER;
 
 public class VillagerPostBlockEntity extends BlockEntity {
-	private static final int MAX_RADIUS = 5;
-
 	private UUID _entityUuid = null;
 
 	public VillagerPostBlockEntity(BlockPos pos, BlockState state) {
