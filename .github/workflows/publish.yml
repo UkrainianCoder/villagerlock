@@ -46,8 +46,22 @@ jobs:
             - name: Cleanup artifacts
               run: rm -f build/libs/*-sources.jar build/libs/*-javadoc.jar
 
+            - name: Generate release title
+              id: release_title
+              run: |
+                  TAG_NAME="${{ steps.tag_detection.outputs.LAST_TAG }}"
+                  if [[ "$TAG_NAME" == *"+"* ]]; then
+                      # substring after the last "+" character and before the first "-" character
+                      TAG_NAME=$(echo "$TAG_NAME" | sed -E 's/.*\+([^+-]+).*/\1/')
+                      echo "Minecraft version detected in tag: $TAG_NAME"
+                      echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
+                  else
+                      echo "No Minecraft version detected in tag, using full tag as title: $TAG_NAME"
+                      echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
+                  fi
+
             - name: Generate release body
-              id: body
+              id: release_body
               run: |
                 REPO_URL="https://github.com/${{ github.repository }}"
                 L_TAG="${{ steps.tags.outputs.LAST_TAG }}"
@@ -69,7 +83,7 @@ jobs:
               uses: softprops/action-gh-release@v2
               with:
                 tag_name: ${{ steps.tags.outputs.LAST_TAG }}
-                name: ${{ steps.tags.outputs.LAST_TAG }}
+                name: ${{ steps.release_title.outputs.TITLE }}
                 body_path: release_body.md
                 files: build/libs/*
                 prerelease: ${{ contains(steps.tags.outputs.LAST_TAG, '-beta') || contains(steps.tags.outputs.LAST_TAG, '-alpha') }}
