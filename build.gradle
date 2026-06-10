@@ -40,6 +40,11 @@ jar {
 	}
 }
 
+tasks.named("jar") {
+	archiveVersion.set("${version}+${project.minecraft_version}")
+	archiveClassifier.set("")
+}
+
 publishing {
 	publications {
 		create("mavenJava", MavenPublication) {
