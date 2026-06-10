@@ -43,6 +43,13 @@ jobs:
                 chmod +x ./gradlew
                 ./gradlew build
 
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: build-libs
+                path: build/libs/*
+                if-no-files-found: ignore
+
             - name: Cleanup artifacts
               run: rm -f build/libs/*-sources.jar build/libs/*-javadoc.jar
 
