@@ -4,12 +4,9 @@ on:
     workflow_dispatch:
     push:
         tags:
-            - 'v[0-9]*.[0-9]*.[0-9]*'
-            - 'v[0-9]*.[0-9]*.[0-9]*-beta'
-            - 'v[0-9]*.[0-9]*.[0-9]*-alpha'
-            - 'v[0-9]*.[0-9]*.[0-9]*.[0-9]*'
-            - 'v[0-9]*.[0-9]*.[0-9]*.[0-9]*-beta'
-            - 'v[0-9]*.[0-9]*.[0-9]*.[0-9]*-alpha'
+            - 'v[0-9]*.[0-9]*.[0-9]*+*'
+            - 'v[0-9]*.[0-9]*.[0-9]*+*-beta'
+            - 'v[0-9]*.[0-9]*.[0-9]*+*-alpha'
 
 permissions:
     contents: write
@@ -29,7 +26,7 @@ jobs:
             - name: Detect tags
               id: tags
               run: |
-                ALL_TAGS=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-beta|-alpha)?$')
+                ALL_TAGS=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+|\+[0-9]+)?(-beta|-alpha)?$')
                 LAST_TAG=$(echo "$ALL_TAGS" | sed -n '1p')
                 PREV_TAG=$(echo "$ALL_TAGS" | sed -n '2p')
                 echo "LAST_TAG=$LAST_TAG" >> $GITHUB_OUTPUT
