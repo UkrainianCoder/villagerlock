@@ -62,7 +62,7 @@ jobs:
                     TAG_NAME=$(echo "$TAG_NAME" | sed -E 's/.*\+([^+-]+).*/\1/')
                     echo "Minecraft version detected in tag: $TAG_NAME"
                     echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
-                elseT
+                else
                     echo "No Minecraft version detected in tag, using full tag as title: $TAG_NAME"
                     echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
                 fi
