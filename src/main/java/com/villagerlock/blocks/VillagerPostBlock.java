@@ -1,6 +1,5 @@
 package com.villagerlock.blocks;
 
-import com.mojang.serialization.MapCodec;
 import com.villagerlock.ModBlocks;
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -158,11 +157,6 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		return this.defaultBlockState()
 				.setValue(BlockStateProperties.FACING, ctx.getHorizontalDirection().getOpposite())
 				.setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
-	}
-
-	@Override
-	protected @NonNull MapCodec<? extends BaseEntityBlock> codec() {
-		return MapCodec.unit(this);
 	}
 
 	@Override
