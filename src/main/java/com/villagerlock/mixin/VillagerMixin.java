@@ -5,17 +5,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
+import net.minecraft.world.entity.ai.village.poi.PoiType;
+import net.minecraft.world.entity.ai.village.poi.PoiTypes;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,6 +35,9 @@ public class VillagerMixin {
 			Map.entry(Blocks.BREWING_STAND, VillagerProfession.CLERIC),
 			Map.entry(Blocks.BARREL, VillagerProfession.FISHERMAN),
 			Map.entry(Blocks.CAULDRON, VillagerProfession.LEATHERWORKER),
+			Map.entry(Blocks.WATER_CAULDRON, VillagerProfession.LEATHERWORKER),
+			Map.entry(Blocks.LAVA_CAULDRON, VillagerProfession.LEATHERWORKER),
+			Map.entry(Blocks.POWDER_SNOW_CAULDRON, VillagerProfession.LEATHERWORKER),
 			Map.entry(Blocks.STONECUTTER, VillagerProfession.MASON),
 			Map.entry(Blocks.SMITHING_TABLE, VillagerProfession.TOOLSMITH),
 			Map.entry(Blocks.BLAST_FURNACE, VillagerProfession.ARMORER),
@@ -74,28 +79,45 @@ public class VillagerMixin {
 	}
 
 	@Unique
+	private static boolean ensurePoiStorage(ServerLevel world, BlockPos professionPos) {
+		BlockState blockState = world.getBlockState(professionPos);
+
+		return PoiTypes.forState(blockState).map(poiType -> {
+			PoiManager poiStorage = world.getPoiManager();
+			Optional<Holder<PoiType>> currentPoiType = poiStorage.getType(professionPos);
+
+			if (currentPoiType.isEmpty()) {
+				poiStorage.add(professionPos, poiType);
+			} else if (!currentPoiType.get().equals(poiType)) {
+				poiStorage.remove(professionPos);
+				poiStorage.add(professionPos, poiType);
+			}
+
+			return true;
+		}).orElse(false);
+	}
+
+	@Unique
 	private static void tryClaimProfession(ServerLevel world, Villager villager, BlockPos professionPos) {
+		if (!ensurePoiStorage(world, professionPos)) {
+			return;
+		}
+
 		Brain<Villager> brain = villager.getBrain();
 		brain.eraseMemory(MemoryModuleType.JOB_SITE);
 		brain.eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
 
 		GlobalPos globalPos = GlobalPos.of(world.dimension(), professionPos);
-		world.registryAccess().lookupOrThrow(Registries.POINT_OF_INTEREST_TYPE)
-				.listElements()
-				.findFirst()
-				.ifPresent(poiType -> {
-					PoiManager poiStorage = world.getPoiManager();
-					if (poiStorage.getType(professionPos).isEmpty()) {
-						poiStorage.add(professionPos, poiType);
-					}
-
-					brain.setMemory(MemoryModuleType.POTENTIAL_JOB_SITE, globalPos);
-					brain.setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(professionPos));
-				});
+		brain.setMemory(MemoryModuleType.POTENTIAL_JOB_SITE, globalPos);
+		brain.setMemory(MemoryModuleType.LOOK_TARGET, new BlockPosTracker(professionPos));
 	}
 
 	@Unique
 	private static void tryReClaimProfession(ServerLevel world, Villager villager, BlockPos professionPos) {
+		if (!ensurePoiStorage(world, professionPos)) {
+			return;
+		}
+
 		Brain<Villager> brain = villager.getBrain();
 		GlobalPos globalPos = GlobalPos.of(world.dimension(), professionPos);
 		brain.setMemory(MemoryModuleType.JOB_SITE, globalPos);
