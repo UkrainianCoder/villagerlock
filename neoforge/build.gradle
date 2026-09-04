@@ -1,0 +1,42 @@
+plugins {
+	id 'net.neoforged.moddev' version "${moddevgradle_version}"
+}
+
+neoForge {
+	version = neoforge_version
+
+	runs {
+		client {
+			client()
+		}
+		server {
+			server()
+		}
+	}
+
+	mods {
+		"${mod_id}" {
+			sourceSet project.sourceSets.main
+		}
+	}
+}
+
+dependencies {
+	compileOnly project(':common')
+}
+
+tasks.named('compileJava', JavaCompile).configure {
+	source project(':common').sourceSets.main.allSource
+}
+
+tasks.named('processResources', ProcessResources).configure {
+	from project(':common').sourceSets.main.resources
+	inputs.property 'version', mod_version
+	filesMatching('META-INF/neoforge.mods.toml') {
+		expand 'version': mod_version
+	}
+}
+
+base {
+	archivesName = "${archives_base_name}-neoforge-${minecraft_version}"
+}

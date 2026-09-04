@@ -1,0 +1,15 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${minecraft_version}"
+
+	compileOnly "net.fabricmc:fabric-loader:${loader_version}"
+}
+
+loom {
+	mixin {
+		useLegacyMixinAp = false
+	}
+}
