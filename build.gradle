@@ -2,7 +2,7 @@ plugins {
     id 'maven-publish'
 }
 
-allprojects {
+subprojects {
     apply plugin: 'java'
     apply plugin: 'maven-publish'
 
@@ -35,10 +35,15 @@ allprojects {
 }
 
 tasks.register('copyArtifacts', Copy) {
-    from subprojects.collect { it.layout.buildDirectory.dir('libs') }
+    dependsOn ':fabric:build', ':neoforge:build'
+
+    from project(':fabric').layout.buildDirectory.dir('libs')
+    from project(':neoforge').layout.buildDirectory.dir('libs')
+
     into layout.buildDirectory.dir('libs')
 }
 
-tasks.named('build') {
+tasks.register('build') {
+    dependsOn ':fabric:build', ':neoforge:build'
     finalizedBy 'copyArtifacts'
 }
