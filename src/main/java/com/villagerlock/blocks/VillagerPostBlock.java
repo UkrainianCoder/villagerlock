@@ -22,6 +22,8 @@ import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -61,14 +63,14 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		super(settings);
 		this.registerDefaultState(this.stateDefinition.any()
 				.setValue(BlockStateProperties.WATERLOGGED, false)
-				.setValue(BlockStateProperties.FACING, Direction.NORTH)
+				.setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH)
 				.setValue(BlockStateProperties.POWERED, false));
 	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		builder.add(BlockStateProperties.WATERLOGGED);
-		builder.add(BlockStateProperties.FACING);
+		builder.add(BlockStateProperties.HORIZONTAL_FACING);
 		builder.add(BlockStateProperties.POWERED);
 	}
 
@@ -167,8 +169,18 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
 		return this.defaultBlockState()
-				.setValue(BlockStateProperties.FACING, ctx.getHorizontalDirection().getOpposite())
+				.setValue(BlockStateProperties.HORIZONTAL_FACING, ctx.getHorizontalDirection().getOpposite())
 				.setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
+	}
+
+	@Override
+	protected @NonNull BlockState rotate(BlockState state, Rotation rotation) {
+		return state.setValue(BlockStateProperties.HORIZONTAL_FACING, rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
+	}
+
+	@Override
+	protected @NonNull BlockState mirror(BlockState state, Mirror mirror) {
+		return state.rotate(mirror.getRotation(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
 	}
 
 	@Override
