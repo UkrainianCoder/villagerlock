@@ -4,9 +4,7 @@ on:
     workflow_dispatch:
     push:
         tags:
-            - 'v[0-9]*.[0-9]*.[0-9]'
-            - 'v[0-9]*.[0-9]*.[0-9]-*'
-            - 'v[0-9]*.[0-9]*.[0-9]+*'
+            - 'v1.*'
 
 permissions:
     contents: write
@@ -60,8 +58,10 @@ jobs:
                   if [[ "$TAG_NAME" == *"+"* ]]; then
                       # substring after the last "+" character and before the first "-" character
                       TAG_NAME=$(echo "$TAG_NAME" | sed -E 's/.*\+([^+-]+).*/\1/')
+                      VERSION=$(echo "$TAG_NAME" | sed -E 's/.*-([^-+]+)\+.*/\1/')
                       echo "Minecraft version detected in tag: $TAG_NAME"
-                      echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
+                      echo "Project version is $VERSION"
+                      echo "TITLE=$TAG_NAME ($VERSION)" >> $GITHUB_OUTPUT
                   else
                       echo "No Minecraft version detected in tag, using full tag as title: $TAG_NAME"
                       echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
