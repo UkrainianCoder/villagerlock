@@ -74,7 +74,7 @@ public class VillagerMixin {
 	}
 
 	@Unique
-	private static void tryClaimProfession(ServerLevel world, Villager villager, Holder<VillagerProfession> profession, BlockPos professionPos) {
+	private static void tryClaimProfession(ServerLevel world, Villager villager, BlockPos professionPos) {
 		Brain<Villager> brain = villager.getBrain();
 		brain.eraseMemory(MemoryModuleType.JOB_SITE);
 		brain.eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
@@ -95,25 +95,14 @@ public class VillagerMixin {
 	}
 
 	@Unique
-	private static void tryReClaimProfession(ServerLevel world, Villager villager, Holder<VillagerProfession> profession, BlockPos professionPos) {
+	private static void tryReClaimProfession(ServerLevel world, Villager villager, BlockPos professionPos) {
 		Brain<Villager> brain = villager.getBrain();
 		GlobalPos globalPos = GlobalPos.of(world.dimension(), professionPos);
 		brain.setMemory(MemoryModuleType.JOB_SITE, globalPos);
 	}
 
 	@Unique
-	private static void tryRemoveProfession(ServerLevel world, Villager villager) {
-		Holder<VillagerProfession> professionEntry = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(VillagerProfession.NONE);
-		Brain<Villager> brain = villager.getBrain();
-		brain.eraseMemory(MemoryModuleType.JOB_SITE);
-		brain.eraseMemory(MemoryModuleType.NEAREST_VISIBLE_PLAYER);
-		brain.eraseMemory(MemoryModuleType.POTENTIAL_JOB_SITE);
-		brain.eraseMemory(MemoryModuleType.LOOK_TARGET);
-		villager.setVillagerData(villager.getVillagerData().withProfession(professionEntry));
-	}
-
-	@Unique
-	private static void onZeroExperience(ServerLevel world, Villager villager) {
+	private static void onExperience(ServerLevel world, Villager villager, boolean isZeroExperience) {
 		Object[] result = findProfessionBlock(world, villager);
 
 		if (result == null) {
@@ -125,27 +114,10 @@ public class VillagerMixin {
 		Holder<VillagerProfession> currentProfession = villager.getVillagerData().profession();
 		Holder<VillagerProfession> requiredProfession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
 
-		if (currentProfession.value() != requiredProfession.value()) {
-			tryClaimProfession(world, villager, requiredProfession, professionBlockPos);
-		}
-	}
-
-	@Unique
-	private static void onNonZeroExperience(ServerLevel world, Villager villager) {
-		Brain<Villager> brain = villager.getBrain();
-		Optional<GlobalPos> memoryInternal = brain.getMemoryInternal(MemoryModuleType.JOB_SITE);
-
-		if (Optional.ofNullable(memoryInternal).orElse(Optional.empty()).isEmpty()) {
-			Object[] result = findProfessionBlock(world, villager);
-			if (result != null) {
-				BlockPos professionBlockPos = (BlockPos) result[0];
-				Block professionBlock = (Block) result[1];
-				Holder<VillagerProfession> currentProfession = villager.getVillagerData().profession();
-				Holder<VillagerProfession> requiredProfession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
-				if (currentProfession.value() == requiredProfession.value()) {
-					tryReClaimProfession(world, villager, currentProfession, professionBlockPos);
-				}
-			}
+		if (isZeroExperience && currentProfession.value() != requiredProfession.value()) {
+			tryClaimProfession(world, villager, professionBlockPos);
+		} else if (!isZeroExperience && currentProfession.value() == requiredProfession.value()) {
+			tryReClaimProfession(world, villager, professionBlockPos);
 		}
 	}
 
@@ -159,11 +131,17 @@ public class VillagerMixin {
 
 		if (VillagerPostBlockHelper.getVillagerPostEntity(villager) != null) {
 			if (villager.getVillagerXp() > 0) {
-				onNonZeroExperience(world, villager);
+				Brain<Villager> brain = villager.getBrain();
+				Optional<GlobalPos> memoryInternal = brain.getMemoryInternal(MemoryModuleType.JOB_SITE);
+
+				if (Optional.ofNullable(memoryInternal).orElse(Optional.empty()).isEmpty()) {
+					onExperience(world, villager, false);
+				}
+
 				return;
 			}
 
-			onZeroExperience(world, villager);
+			onExperience(world, villager, true);
 		}
 	}
 }
