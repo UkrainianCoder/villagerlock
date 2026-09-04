@@ -30,7 +30,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	private UUID _entityUuid = null;
 
 	public VillagerPostBlockEntity(BlockPos pos, BlockState state) {
-		super(VILLAGER_POST_ENTITY, pos, state);
+		super(VILLAGER_POST_ENTITY.get(), pos, state);
 	}
 
 	public static boolean isEntityOnPost(Entity entity) {
