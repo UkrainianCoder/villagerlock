@@ -54,7 +54,7 @@ jobs:
             - name: Generate release title
               id: release_title
               run: |
-                  TAG_NAME="${{ steps.tag_detection.outputs.LAST_TAG }}"
+                  TAG_NAME="${{ steps.tags.outputs.LAST_TAG }}"
                   if [[ "$TAG_NAME" == *"+"* ]]; then
                       # substring after the last "+" character and before the first "-" character
                       TAG_NAME=$(echo "$TAG_NAME" | sed -E 's/.*\+([^+-]+).*/\1/')
