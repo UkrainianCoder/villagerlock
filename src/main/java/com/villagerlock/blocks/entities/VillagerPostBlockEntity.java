@@ -34,10 +34,6 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	public static boolean isEntityOnPost(Entity entity) {
-		if (entity.isNoGravity()) {
-			return true;
-		}
-
 		return entity.entityTags().contains("locked_on_post");
 	}
 
