@@ -62,10 +62,7 @@ public class VillagerMixin {
 	private static Object[] findProfessionBlock(ServerLevel world, Villager villager) {
 		BlockPos pos = villager.blockPosition();
 		BlockPos[] adjacentPositions = new BlockPos[]{
-				pos.north(),
-				pos.south(),
-				pos.east(),
-				pos.west()
+				pos.north(), pos.south(), pos.east(), pos.west()
 		};
 
 		for (BlockPos adjacent : adjacentPositions) {
@@ -134,7 +131,8 @@ public class VillagerMixin {
 		BlockPos professionBlockPos = (BlockPos) result[0];
 		Block professionBlock = (Block) result[1];
 		Holder<VillagerProfession> currentProfession = villager.getVillagerData().profession();
-		Holder<VillagerProfession> requiredProfession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(getProfessionByBlock(professionBlock));
+		Holder<VillagerProfession> requiredProfession = BuiltInRegistries.VILLAGER_PROFESSION.getOrThrow(
+				getProfessionByBlock(professionBlock));
 
 		if (isZeroExperience && currentProfession.value() != requiredProfession.value()) {
 			tryClaimProfession(world, villager, professionBlockPos);

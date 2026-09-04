@@ -24,13 +24,13 @@ public class VillagerPostBlockHelper {
 
 	public static VillagerPostBlockEntity getVillagerPostEntity(Level world, BlockPos pos, UUID uuid) {
 		BlockPos[] adjacentPositions = new BlockPos[]{
-				pos,
-				pos.below()
+				pos, pos.below()
 		};
 
 		for (BlockPos adjacent : adjacentPositions) {
 			BlockEntity blockEntity = world.getBlockEntity(adjacent);
-			if (blockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && uuid.equals(post.getEntityUuid())) {
+			if (blockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && uuid.equals(
+					post.getEntityUuid())) {
 				return post;
 			}
 		}

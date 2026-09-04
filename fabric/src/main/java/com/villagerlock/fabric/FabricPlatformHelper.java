@@ -53,6 +53,7 @@ public class FabricPlatformHelper implements PlatformHelper {
 				id,
 				FabricBlockEntityTypeBuilder.create(factory::create, blocks).build()
 		);
+		
 		return () -> blockEntityType;
 	}
 }

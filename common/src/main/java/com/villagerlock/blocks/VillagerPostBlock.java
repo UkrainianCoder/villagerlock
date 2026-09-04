@@ -91,7 +91,8 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 				if (customEntity instanceof VillagerPostBlockEntity blockEntity) {
 					if (blockEntity.isOccupied()) {
 						Entity rider = tickerWorld.getEntity(blockEntity.getEntityUuid());
-						if (rider == null || rider.distanceToSqr(tickerPos.getX() + 0.5, tickerPos.getY(), tickerPos.getZ() + 0.5) > 2.0D) {
+						if (rider == null || rider.distanceToSqr(
+								tickerPos.getX() + 0.5, tickerPos.getY(), tickerPos.getZ() + 0.5) > 2.0D) {
 							blockEntity.unseat(tickerWorld, false);
 						}
 					}
@@ -133,7 +134,9 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 			return;
 		}
 
-		if (!postBlockEntity.isOccupied() && !VillagerPostBlockEntity.isEntityOnPost(entity) && entity.getVehicle() == null && entity instanceof LivingEntity livingEntity && !livingEntity.isSleeping() && (entity instanceof Villager || entity instanceof ZombieVillager)) {
+		if (!postBlockEntity.isOccupied() && !VillagerPostBlockEntity.isEntityOnPost(entity)
+				&& entity.getVehicle() == null && entity instanceof LivingEntity livingEntity
+				&& !livingEntity.isSleeping() && (entity instanceof Villager || entity instanceof ZombieVillager)) {
 			postBlockEntity.seat(world, entity);
 		}
 	}
@@ -154,7 +157,8 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 
 	@Override
 	public @NonNull FluidState getFluidState(BlockState state) {
-		return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+		return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(
+				state);
 	}
 
 	@Override
@@ -168,14 +172,17 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-		return this.defaultBlockState()
-				.setValue(BlockStateProperties.HORIZONTAL_FACING, ctx.getHorizontalDirection().getOpposite())
-				.setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
+		return this.defaultBlockState().setValue(
+				BlockStateProperties.HORIZONTAL_FACING, ctx.getHorizontalDirection().getOpposite()).setValue(
+				BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
 	}
 
 	@Override
 	protected @NonNull BlockState rotate(BlockState state, Rotation rotation) {
-		return state.setValue(BlockStateProperties.HORIZONTAL_FACING, rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
+		return state.setValue(
+				BlockStateProperties.HORIZONTAL_FACING,
+				rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
+		);
 	}
 
 	@Override
