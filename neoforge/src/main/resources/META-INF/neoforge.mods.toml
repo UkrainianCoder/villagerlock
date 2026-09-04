@@ -1,28 +1,28 @@
-modLoader="javafml"
-loaderVersion="[1,)"
-license="CC0-1.0"
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "CC0-1.0"
 
 [[mods]]
-modId="villagerlock"
-version="${version}"
-displayName="Villager Lock"
-authors="UkrainianCoder, xiader45"
-description='''Villager Lock adds the Villager Post, a block designed to lock villagers to their job sites, ensuring perfectly organized and efficient trading halls!'''
-logoFile="assets/villager-lock/icon.png"
+modId = "villagerlock"
+version = "${version}"
+displayName = "Villager Lock"
+authors = "UkrainianCoder, xiader45"
+description = '''Villager Lock adds the Villager Post, a block designed to lock villagers to their job sites, ensuring perfectly organized and efficient trading halls!'''
+logoFile = "assets/villager-lock/icon.png"
 
 [[mixins]]
-config="villager-lock.mixins.json"
+config = "villager-lock.mixins.json"
 
 [[dependencies.villagerlock]]
-    modId="neoforge"
-    type="required"
-    versionRange="[1,)"
-    ordering="NONE"
-    side="BOTH"
+modId = "neoforge"
+type = "required"
+versionRange = "[1,)"
+ordering = "NONE"
+side = "BOTH"
 
 [[dependencies.villagerlock]]
-    modId="minecraft"
-    type="required"
-    versionRange="[26.3,)"
-    ordering="NONE"
-    side="BOTH"
+modId = "minecraft"
+type = "required"
+versionRange = "[26.2,)"
+ordering = "NONE"
+side = "BOTH"
