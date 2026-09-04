@@ -52,8 +52,14 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	@SuppressWarnings("resource")
 	private void freezeEntity(Entity entity) {
 		BlockState state = entity.level().getBlockState(worldPosition);
-		Direction facing = state.hasProperty(BlockStateProperties.HORIZONTAL_FACING) ? state.getValue(BlockStateProperties.HORIZONTAL_FACING) : Direction.NORTH;
-		float blockYaw = facing.toYRot();
+		Direction facing = Direction.NORTH;
+
+		if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
+			facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
+		} else if (state.hasProperty(BlockStateProperties.FACING)) {
+			facing = state.getValue(BlockStateProperties.FACING);
+		}
+
 
 		entity.setNoGravity(true);
 
@@ -70,6 +76,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 			mobEntity.setXxa(0);
 		}
 
+		float blockYaw = facing.toYRot();
 		entity.setDeltaMovement(Vec3.ZERO);
 		entity.snapTo(
 				worldPosition.getX() + 0.5,
