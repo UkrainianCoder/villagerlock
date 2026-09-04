@@ -4,12 +4,7 @@ on:
     workflow_dispatch:
     push:
         tags:
-            - 'v[0-9]*.[0-9]*.[0-9]*'
-            - 'v[0-9]*.[0-9]*.[0-9]*-beta'
-            - 'v[0-9]*.[0-9]*.[0-9]*-alpha'
-            - 'v[0-9]*.[0-9]*.[0-9]*.[0-9]*'
-            - 'v[0-9]*.[0-9]*.[0-9]*.[0-9]*-beta'
-            - 'v[0-9]*.[0-9]*.[0-9]*.[0-9]*-alpha'
+            - 'v1.*'
 
 permissions:
     contents: write
@@ -29,7 +24,7 @@ jobs:
             - name: Detect tags
               id: tags
               run: |
-                ALL_TAGS=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?(-beta|-alpha)?$')
+                ALL_TAGS=$(git tag --sort=-creatordate | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+|\+[0-9]+)?(-beta|-alpha)?$')
                 LAST_TAG=$(echo "$ALL_TAGS" | sed -n '1p')
                 PREV_TAG=$(echo "$ALL_TAGS" | sed -n '2p')
                 echo "LAST_TAG=$LAST_TAG" >> $GITHUB_OUTPUT
@@ -46,11 +41,34 @@ jobs:
                 chmod +x ./gradlew
                 ./gradlew build
 
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: build-libs
+                path: build/libs/*
+                if-no-files-found: ignore
+
             - name: Cleanup artifacts
               run: rm -f build/libs/*-sources.jar build/libs/*-javadoc.jar
 
+            - name: Generate release title
+              id: release_title
+              run: |
+                  TAG_NAME="${{ steps.tag_detection.outputs.LAST_TAG }}"
+                  if [[ "$TAG_NAME" == *"+"* ]]; then
+                      # substring after the last "+" character and before the first "-" character
+                      TAG_NAME=$(echo "$TAG_NAME" | sed -E 's/.*\+([^+-]+).*/\1/')
+                      VERSION=$(echo "$TAG_NAME" | sed -E 's/.*-([^-+]+)\+.*/\1/')
+                      echo "Minecraft version detected in tag: $TAG_NAME"
+                      echo "Project version is $VERSION"
+                      echo "TITLE=$TAG_NAME ($VERSION)" >> $GITHUB_OUTPUT
+                  else
+                      echo "No Minecraft version detected in tag, using full tag as title: $TAG_NAME"
+                      echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
+                  fi
+
             - name: Generate release body
-              id: body
+              id: release_body
               run: |
                 REPO_URL="https://github.com/${{ github.repository }}"
                 L_TAG="${{ steps.tags.outputs.LAST_TAG }}"
@@ -72,7 +90,7 @@ jobs:
               uses: softprops/action-gh-release@v2
               with:
                 tag_name: ${{ steps.tags.outputs.LAST_TAG }}
-                name: ${{ steps.tags.outputs.LAST_TAG }}
+                name: ${{ steps.release_title.outputs.TITLE }}
                 body_path: release_body.md
                 files: build/libs/*
                 prerelease: ${{ contains(steps.tags.outputs.LAST_TAG, '-beta') || contains(steps.tags.outputs.LAST_TAG, '-alpha') }}
