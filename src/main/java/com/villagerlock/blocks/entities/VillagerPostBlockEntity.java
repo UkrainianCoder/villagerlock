@@ -136,6 +136,15 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	@Override
+	public void preRemoveSideEffects(@NonNull BlockPos pos, @NonNull BlockState state) {
+		super.preRemoveSideEffects(pos, state);
+
+		if (this.level != null) {
+			unseat(this.level, true);
+		}
+	}
+
+	@Override
 	public Packet<ClientGamePacketListener> getUpdatePacket() {
 		return ClientboundBlockEntityDataPacket.create(this);
 	}

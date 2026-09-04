@@ -34,6 +34,7 @@ import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.redstone.Orientation;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -107,6 +108,16 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		}
 
 		return super.playerWillDestroy(world, pos, state, player);
+	}
+
+	@Override
+	protected void affectNeighborsAfterRemoval(@NonNull BlockState state, @NonNull ServerLevel world, @NonNull BlockPos pos, boolean movedByPiston) {
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if (blockEntity instanceof VillagerPostBlockEntity postBlockEntity) {
+			postBlockEntity.unseat(world, true);
+		}
+
+		super.affectNeighborsAfterRemoval(state, world, pos, movedByPiston);
 	}
 
 	@Override
