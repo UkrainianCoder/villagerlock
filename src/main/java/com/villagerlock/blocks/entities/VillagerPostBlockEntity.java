@@ -2,6 +2,11 @@ package com.villagerlock.blocks.entities;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -131,12 +136,28 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	}
 
 	@Override
+	public Packet<ClientGamePacketListener> getUpdatePacket() {
+		return ClientboundBlockEntityDataPacket.create(this);
+	}
+
+	@Override
+	public @NonNull CompoundTag getUpdateTag(HolderLookup.@NonNull Provider registries) {
+		return saveCustomOnly(registries);
+	}
+
+	@Override
 	protected void loadAdditional(@NonNull ValueInput view) {
 		super.loadAdditional(view);
 
 		String entityUuidStr = view.getStringOr("EntityUuid", "");
 		if (!entityUuidStr.isEmpty()) {
-			_entityUuid = UUID.fromString(entityUuidStr);
+			try {
+				_entityUuid = UUID.fromString(entityUuidStr);
+			} catch (IllegalArgumentException e) {
+				_entityUuid = null;
+			}
+		} else {
+			_entityUuid = null;
 		}
 	}
 
@@ -144,11 +165,8 @@ public class VillagerPostBlockEntity extends BlockEntity {
 	protected void saveAdditional(@NonNull ValueOutput view) {
 		super.saveAdditional(view);
 
-		if (isOccupied()) {
+		if (isOccupied() && _entityUuid != null) {
 			view.putString("EntityUuid", _entityUuid.toString());
-			return;
 		}
-
-		view.putString("EntityUuid", "");
 	}
 }
