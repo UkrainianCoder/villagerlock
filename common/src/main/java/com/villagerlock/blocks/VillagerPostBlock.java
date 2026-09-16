@@ -191,11 +191,6 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	protected @NonNull MapCodec<? extends BaseEntityBlock> codec() {
-		return MapCodec.unit(this);
-	}
-
-	@Override
 	public @Nullable <T extends BlockEntity> GameEventListener getListener(@NonNull ServerLevel world, T blockEntity) {
 		return super.getListener(world, blockEntity);
 	}
