@@ -1,15 +1,16 @@
 {
-	"required": true,
-	"package": "com.villagerlock.mixin",
-	"compatibilityLevel": "JAVA_25",
-	"mixins": [
-		"MobEntityMixin",
-		"VillagerMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
+    "required": true,
+    "package": "com.villagerlock.mixin",
+    "compatibilityLevel": "JAVA_25",
+    "mixins": [
+        "MobEntityMixin",
+        "VillagerMixin",
+        "WanderingTraderEntityMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "overwrites": {
+        "requireAnnotations": true
 	}
 }
