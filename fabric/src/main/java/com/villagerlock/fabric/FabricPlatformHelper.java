@@ -2,6 +2,7 @@ package com.villagerlock.fabric;
 
 import com.villagerlock.VillagerLock;
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
+import com.villagerlock.platform.BlockEntityFactory;
 import com.villagerlock.platform.PlatformHelper;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -45,7 +46,7 @@ public class FabricPlatformHelper implements PlatformHelper {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Supplier<BlockEntityType<VillagerPostBlockEntity>> registerVillagerPostEntity(String name, BlockEntityType.BlockEntitySupplier<VillagerPostBlockEntity> factory, Supplier<? extends Block>... validBlocks) {
+	public Supplier<BlockEntityType<VillagerPostBlockEntity>> registerVillagerPostEntity(String name, BlockEntityFactory<VillagerPostBlockEntity> factory, Supplier<? extends Block>... validBlocks) {
 		Identifier id = Identifier.fromNamespaceAndPath(VillagerLock.MOD_ID, name);
 		Block[] blocks = Arrays.stream(validBlocks).map(Supplier::get).toArray(Block[]::new);
 		BlockEntityType<VillagerPostBlockEntity> blockEntityType = Registry.register(

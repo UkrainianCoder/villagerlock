@@ -17,5 +17,5 @@ public interface PlatformHelper {
 	<T extends Block> Supplier<Item> registerBlockItem(String name, Supplier<T> blockSupplier, ResourceKey<CreativeModeTab> tab);
 
 	@SuppressWarnings("unchecked")
-	Supplier<BlockEntityType<VillagerPostBlockEntity>> registerVillagerPostEntity(String name, BlockEntityType.BlockEntitySupplier<VillagerPostBlockEntity> factory, Supplier<? extends Block>... validBlocks);
+	Supplier<BlockEntityType<VillagerPostBlockEntity>> registerVillagerPostEntity(String name, BlockEntityFactory<VillagerPostBlockEntity> factory, Supplier<? extends Block>... validBlocks);
 }

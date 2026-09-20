@@ -2,6 +2,7 @@ package com.villagerlock.neoforge;
 
 import com.villagerlock.VillagerLock;
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
+import com.villagerlock.platform.BlockEntityFactory;
 import com.villagerlock.platform.PlatformHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -31,7 +32,10 @@ import java.util.stream.Collectors;
 public class NeoForgePlatformHelper implements PlatformHelper {
 	public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(VillagerLock.MOD_ID);
 	public static final DeferredRegister.Items ITEMS = DeferredRegister.createItems(VillagerLock.MOD_ID);
-	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, VillagerLock.MOD_ID);
+	public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = DeferredRegister.create(
+			Registries.BLOCK_ENTITY_TYPE,
+			VillagerLock.MOD_ID
+	);
 
 	private static final List<Supplier<? extends Item>> TAB_ITEMS = new ArrayList<>();
 	private static ResourceKey<CreativeModeTab> TARGET_TAB;
@@ -44,7 +48,7 @@ public class NeoForgePlatformHelper implements PlatformHelper {
 	}
 
 	private static void onBuildCreativeTabContents(BuildCreativeModeTabContentsEvent event) {
-		if (TARGET_TAB != null && event.getTabKey().equals(TARGET_TAB)) {
+		if (event.getTabKey().equals(TARGET_TAB)) {
 			for (Supplier<? extends Item> itemSupplier : TAB_ITEMS) {
 				event.accept(itemSupplier.get());
 			}
@@ -64,18 +68,23 @@ public class NeoForgePlatformHelper implements PlatformHelper {
 		TARGET_TAB = tab;
 		Identifier id = Identifier.fromNamespaceAndPath(VillagerLock.MOD_ID, name);
 		ResourceKey<Item> key = ResourceKey.create(BuiltInRegistries.ITEM.key(), id);
-		DeferredItem<Item> item = ITEMS.register(name, () -> new BlockItem(blockSupplier.get(), new Item.Properties().setId(key)));
+		DeferredItem<Item> item = ITEMS.register(
+				name,
+				() -> new BlockItem(blockSupplier.get(), new Item.Properties().setId(key))
+		);
 		TAB_ITEMS.add(item);
 		return item;
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Supplier<BlockEntityType<VillagerPostBlockEntity>> registerVillagerPostEntity(String name, BlockEntityType.BlockEntitySupplier<VillagerPostBlockEntity> factory, Supplier<? extends Block>... validBlocks) {
-		DeferredHolder<BlockEntityType<?>, BlockEntityType<VillagerPostBlockEntity>> holder = BLOCK_ENTITY_TYPES.register(name, () -> {
-			Set<Block> blockSet = Arrays.stream(validBlocks).map(Supplier::get).collect(Collectors.toSet());
-			return new BlockEntityType<>(factory::create, blockSet);
-		});
+	public Supplier<BlockEntityType<VillagerPostBlockEntity>> registerVillagerPostEntity(String name, BlockEntityFactory<VillagerPostBlockEntity> factory, Supplier<? extends Block>... validBlocks) {
+		DeferredHolder<BlockEntityType<?>, BlockEntityType<VillagerPostBlockEntity>> holder = BLOCK_ENTITY_TYPES.register(
+				name, () -> {
+					Set<Block> blockSet = Arrays.stream(validBlocks).map(Supplier::get).collect(Collectors.toSet());
+					return new BlockEntityType<>(factory::create, blockSet);
+				}
+		);
 		return holder;
 	}
 }
