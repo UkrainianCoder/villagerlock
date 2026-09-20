@@ -12,6 +12,7 @@ import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.zombie.ZombieVillager;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -19,12 +20,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
-import net.minecraft.world.level.block.BaseEntityBlock;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -36,7 +32,6 @@ import net.minecraft.world.level.gameevent.GameEventListener;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.redstone.Orientation;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -62,9 +57,9 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	public VillagerPostBlock(BlockBehaviour.Properties settings) {
 		super(settings);
 		this.registerDefaultState(this.stateDefinition.any()
-				.setValue(BlockStateProperties.WATERLOGGED, false)
-				.setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH)
-				.setValue(BlockStateProperties.POWERED, false));
+													  .setValue(BlockStateProperties.WATERLOGGED, false)
+													  .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.NORTH)
+													  .setValue(BlockStateProperties.POWERED, false));
 	}
 
 	@Override
@@ -86,12 +81,16 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, @NonNull BlockState state, @NonNull BlockEntityType<T> type) {
-		if (!world.isClientSide() && type == ModBlocks.VILLAGER_POST_ENTITY.get()) {
+		if (!world.isClientSide() && type == ModBlocks.VILLAGER_POST_ENTITY) {
 			return (tickerWorld, tickerPos, _, customEntity) -> {
 				if (customEntity instanceof VillagerPostBlockEntity blockEntity) {
 					if (blockEntity.isOccupied()) {
 						Entity rider = tickerWorld.getEntity(blockEntity.getEntityUuid());
-						if (rider == null || rider.distanceToSqr(tickerPos.getX() + 0.5, tickerPos.getY(), tickerPos.getZ() + 0.5) > 2.0D) {
+						if (rider == null || rider.distanceToSqr(
+								tickerPos.getX() + 0.5,
+								tickerPos.getY(),
+								tickerPos.getZ() + 0.5
+						) > 2.0D) {
 							blockEntity.unseat(tickerWorld, false);
 						}
 					}
@@ -131,12 +130,24 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (!(blockEntity instanceof VillagerPostBlockEntity postBlockEntity)) {
 			return;
+		} else if (postBlockEntity.isOccupied() || VillagerPostBlockEntity.isEntityOnPost(entity)) {
+			return;
+		} else if (!(entity instanceof LivingEntity livingEntity) || entity.getVehicle() != null) {
+			return;
+		} else if (livingEntity.isSleeping()) {
+			return;
 		}
 
-		if (!postBlockEntity.isOccupied() && !VillagerPostBlockEntity.isEntityOnPost(entity) && entity.getVehicle() == null && entity instanceof LivingEntity livingEntity && !livingEntity.isSleeping() && (entity instanceof Villager || entity instanceof ZombieVillager)) {
+		boolean isVillage = entity instanceof Villager;
+		boolean isZombieVillage = entity instanceof ZombieVillager;
+		boolean isTrader = entity instanceof WanderingTrader;
+		boolean canSeat = isVillage || isZombieVillage || isTrader;
+
+		if (canSeat) {
 			postBlockEntity.seat(world, entity);
 		}
 	}
+
 
 	@Override
 	public void neighborChanged(@NonNull BlockState state, Level world, @NonNull BlockPos pos, @NonNull Block sourceBlock, Orientation wireOrientation, boolean notify) {
@@ -154,7 +165,11 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 
 	@Override
 	public @NonNull FluidState getFluidState(BlockState state) {
-		return state.getValue(BlockStateProperties.WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
+			return Fluids.WATER.getSource(false);
+		} else {
+			return super.getFluidState(state);
+		}
 	}
 
 	@Override
@@ -168,14 +183,18 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-		return this.defaultBlockState()
-				.setValue(BlockStateProperties.HORIZONTAL_FACING, ctx.getHorizontalDirection().getOpposite())
-				.setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
+		return this.defaultBlockState().setValue(
+				BlockStateProperties.HORIZONTAL_FACING,
+				ctx.getHorizontalDirection().getOpposite()
+		).setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
 	}
 
 	@Override
 	protected @NonNull BlockState rotate(BlockState state, Rotation rotation) {
-		return state.setValue(BlockStateProperties.HORIZONTAL_FACING, rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
+		return state.setValue(
+				BlockStateProperties.HORIZONTAL_FACING,
+				rotation.rotate(state.getValue(BlockStateProperties.HORIZONTAL_FACING))
+		);
 	}
 
 	@Override
