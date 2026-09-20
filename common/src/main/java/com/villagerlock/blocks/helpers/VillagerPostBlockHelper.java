@@ -2,21 +2,14 @@ package com.villagerlock.blocks.helpers;
 
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.monster.zombie.ZombieVillager;
-import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
 import java.util.UUID;
 
 public class VillagerPostBlockHelper {
-	public static VillagerPostBlockEntity getVillagerPostEntity(ZombieVillager zombieVilliager) {
-		Level world = zombieVilliager.level();
-		BlockPos pos = zombieVilliager.blockPosition();
-		return getVillagerPostEntity(world, pos, zombieVilliager.getUUID());
-	}
-
-	public static VillagerPostBlockEntity getVillagerPostEntity(Villager villager) {
+	public static VillagerPostBlockEntity getVillagerPostEntity(LivingEntity villager) {
 		Level world = villager.level();
 		BlockPos pos = villager.blockPosition();
 		return getVillagerPostEntity(world, pos, villager.getUUID());
@@ -29,8 +22,7 @@ public class VillagerPostBlockHelper {
 
 		for (BlockPos adjacent : adjacentPositions) {
 			BlockEntity blockEntity = world.getBlockEntity(adjacent);
-			if (blockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && uuid.equals(
-					post.getEntityUuid())) {
+			if (blockEntity instanceof VillagerPostBlockEntity post && post.isOccupied() && uuid.equals(post.getEntityUuid())) {
 				return post;
 			}
 		}
