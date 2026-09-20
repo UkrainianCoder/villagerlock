@@ -56,7 +56,6 @@ public class VillagerPostBlockEntity extends BlockEntity {
 			facing = state.getValue(BlockStateProperties.FACING);
 		}
 
-
 		entity.setNoGravity(true);
 
 		if (entity instanceof LivingEntity living) {
