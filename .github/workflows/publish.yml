@@ -118,6 +118,7 @@ jobs:
                 echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
 
     build:
+        name: ${{ matrix.version }}
         needs: prepare
         runs-on: ubuntu-24.04
         strategy:
@@ -151,6 +152,7 @@ jobs:
                 if-no-files-found: ignore
 
     publish-fabric:
+        name: ${{ matrix.version }}
         needs: [prepare, build]
         if: ${{ !inputs.skip_fabric_upload }}
         runs-on: ubuntu-24.04
@@ -202,6 +204,7 @@ jobs:
                     build/libs/*-fabric-*.jar
 
     publish-neoforge:
+        name: ${{ matrix.version }}
         needs: [prepare, build]
         if: ${{ !inputs.skip_neoforge_upload }}
         runs-on: ubuntu-24.04
