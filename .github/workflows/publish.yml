@@ -62,8 +62,9 @@ jobs:
                 fi
 
                 LAST_TAG="$CURRENT_TAG"
-                MOD_VERSION="${LAST_TAG#v}"
                 PREV_TAG=$(echo "$TAGS" | grep -A 1 -Fx "$LAST_TAG" | sed -n '2p')
+                MOD_VERSION="${LAST_TAG#v}"
+                MOD_VERSION="${MOD_VERSION%%+*}"
 
                 echo "Current/Last tag: $LAST_TAG"
                 echo "Previous tag: $PREV_TAG"
@@ -73,49 +74,11 @@ jobs:
                 echo "PREV_TAG=$PREV_TAG" >> "$GITHUB_OUTPUT"
                 echo "MOD_VERSION=$MOD_VERSION" >> "$GITHUB_OUTPUT"
 
-            - name: Detect Minecraft versions matrix
+            - name: Detect Minecraft versions
               id: matrix
-              run: |
-                VERSIONS="${{ inputs.tag }}"
-                if [ -z "$VERSIONS" ]; then
-                    VERSION_FILES=$(ls -1r versions/*.properties 2>/dev/null)
-                    VERSIONS=$(echo "$VERSION_FILES" | sed -E 's|versions/(.*)\.properties|\1|' | paste -sd, -)
-                fi
-
-                MATRIX="[]"
-                IFS=',' read -ra VERSION_LIST <<< "$VERSIONS"
-
-                for VERSION in "${VERSION_LIST[@]}"; do
-                    VERSION=$(echo "$VERSION" | tr -d ' \r\n')
-                    [ -n "$VERSION" ] || continue
-
-                    VERSION_PROPERTIES="versions/${VERSION}.properties"
-
-                    if [ -f "$VERSION_PROPERTIES" ]; then
-                        MIN_MINECRAFT_VERSION=$(grep -E '^minecraft_version=' "$VERSION_PROPERTIES" | cut -d'=' -f2 | tr -d ' \r\n')
-                        MAX_MINECRAFT_VERSION=$(grep -E '^minecraft_version_max=' "$VERSION_PROPERTIES" | cut -d'=' -f2 | tr -d ' \r\n')
-                    else
-                        echo "Warning: Version properties file not found for $VERSION. Skipping."
-                        continue
-                    fi
-
-                    [ -n "$MIN_MINECRAFT_VERSION" ] || MIN_MINECRAFT_VERSION="$VERSION"
-                    [ -n "$MAX_MINECRAFT_VERSION" ] || MAX_MINECRAFT_VERSION="$MIN_MINECRAFT_VERSION"
-
-                    if [ "$MIN_MINECRAFT_VERSION" = "$MAX_MINECRAFT_VERSION" ]; then
-                        GAME_VERSIONS="[$MIN_MINECRAFT_VERSION]"
-                    else
-                        GAME_VERSIONS="[$MIN_MINECRAFT_VERSION,$MAX_MINECRAFT_VERSION]"
-                    fi
-
-                    MATRIX=$(echo "$MATRIX" | jq -c \
-                        --arg VERSION "$VERSION" \
-                        --arg GAME_VERSIONS "$GAME_VERSIONS" \
-                        '. += [{"version": $VERSION, "game_versions": $GAME_VERSIONS}]')
-                done
-
-                echo "Generated matrix: $MATRIX"
-                echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+              uses: ./.github/actions/detect-minecraft-versions
+              with:
+                versions: ${{ inputs.tag }}
 
     build:
         name: ${{ matrix.version }}
@@ -187,7 +150,7 @@ jobs:
                 modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
                 curseforge-id: ${{ vars.CURSEFORGE_ID }}
                 curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-                name: "${{ matrix.version }} (${{ needs.prepare.outputs.mod_version }}, Fabric)"
+                name: "${{ matrix.version }} (v${{ needs.prepare.outputs.mod_version }}, Fabric)"
                 version: "${{ needs.prepare.outputs.last_tag }}+${{ matrix.version }}"
                 version-type: ${{ contains(needs.prepare.outputs.last_tag, '-beta') || contains(needs.prepare.outputs.last_tag, '-alpha') && 'beta' || 'release' }}
                 changelog: "[See on GitHub](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.prepare.outputs.last_tag }})"
@@ -239,7 +202,7 @@ jobs:
                 modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
                 curseforge-id: ${{ vars.CURSEFORGE_ID }}
                 curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
-                name: "${{ matrix.version }} (${{ needs.prepare.outputs.mod_version }}, NeoForge)"
+                name: "${{ matrix.version }} (v${{ needs.prepare.outputs.mod_version }}, NeoForge)"
                 version: "${{ needs.prepare.outputs.last_tag }}+${{ matrix.version }}"
                 version-type: ${{ contains(needs.prepare.outputs.last_tag, '-beta') || contains(needs.prepare.outputs.last_tag, '-alpha') && 'beta' || 'release' }}
                 changelog: "[See on GitHub](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.prepare.outputs.last_tag }})"
@@ -258,6 +221,11 @@ jobs:
         if: ${{ !inputs.skip_github_release }}
         runs-on: ubuntu-24.04
         steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
             - name: Download build artifacts
               uses: actions/download-artifact@v4
               with:

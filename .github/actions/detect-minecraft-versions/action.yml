@@ -1,0 +1,63 @@
+name: Detect Minecraft versions
+description: Detect Minecraft versions matrix for the build workflow
+
+inputs:
+    versions:
+        required: false
+        default: ''
+
+outputs:
+    matrix:
+        description: The generated Minecraft versions matrix
+        value: ${{ steps.matrix.outputs.matrix }}
+
+runs:
+    using: composite
+    steps:
+        - name: Detect Minecraft versions matrix
+          id: matrix
+          shell: bash
+          env:
+            INPUT_VERSIONS: ${{ inputs.versions }}
+          run: |-
+            VERSIONS="$INPUT_VERSIONS"
+
+            if [ -z "$VERSIONS" ]; then
+                VERSION_FILES=$(ls -1r versions/*.properties 2>/dev/null)
+                VERSIONS=$(echo "$VERSION_FILES" | sed -E 's|versions/(.*)\.properties|\1|' | paste -sd, -)
+            fi
+
+            MATRIX="[]"
+            IFS=',' read -ra VERSION_LIST <<< "$VERSIONS"
+
+            for VERSION in "${VERSION_LIST[@]}"; do
+                VERSION=$(echo "$VERSION" | tr -d ' \r\n')
+                [ -n "$VERSION" ] || continue
+
+                VERSION_PROPERTIES="versions/${VERSION}.properties"
+
+                if [ -f "$VERSION_PROPERTIES" ]; then
+                    MIN_MINECRAFT_VERSION=$(grep -E '^minecraft_version=' "$VERSION_PROPERTIES" | cut -d'=' -f2 | tr -d ' \r\n')
+                    MAX_MINECRAFT_VERSION=$(grep -E '^minecraft_version_max=' "$VERSION_PROPERTIES" | cut -d'=' -f2 | tr -d ' \r\n')
+                else
+                    echo "Warning: Version properties file not found for $VERSION. Skipping."
+                    continue
+                fi
+
+                [ -n "$MIN_MINECRAFT_VERSION" ] || MIN_MINECRAFT_VERSION="$VERSION"
+                [ -n "$MAX_MINECRAFT_VERSION" ] || MAX_MINECRAFT_VERSION="$MIN_MINECRAFT_VERSION"
+
+                if [ "$MIN_MINECRAFT_VERSION" = "$MAX_MINECRAFT_VERSION" ]; then
+                    GAME_VERSIONS="[$MIN_MINECRAFT_VERSION]"
+                else
+                    GAME_VERSIONS="[$MIN_MINECRAFT_VERSION,$MAX_MINECRAFT_VERSION]"
+                fi
+
+                MATRIX=$(echo "$MATRIX" | jq -c \
+                    --arg VERSION "$VERSION" \
+                    --arg GAME_VERSIONS "$GAME_VERSIONS" \
+                    '. += [{"version": $VERSION, "game_versions": $GAME_VERSIONS}]')
+            done
+
+            echo "Generated matrix: $MATRIX"
+            echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
