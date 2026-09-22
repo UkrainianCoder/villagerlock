@@ -73,32 +73,6 @@ jobs:
                 echo "PREV_TAG=$PREV_TAG" >> "$GITHUB_OUTPUT"
                 echo "MOD_VERSION=$MOD_VERSION" >> "$GITHUB_OUTPUT"
 
-            - name: Detect release body
-              id: release_body
-              run: |
-                REPO_URL="https://github.com/${{ github.repository }}"
-                L_TAG="${{ steps.tags.outputs.LAST_TAG }}"
-                P_TAG="${{ steps.tags.outputs.PREV_TAG }}"
-
-                if [ -z "$P_TAG" ]; then
-                    GIT_LOG=$(git log "$L_TAG" --pretty=format:"- [#%h]($REPO_URL/commit/%h): %s")
-                    CHANGELOG_URL="$REPO_URL/releases/tag/$L_TAG"
-                else
-                    GIT_LOG=$(git log "$P_TAG..$L_TAG" --pretty=format:"- [#%h]($REPO_URL/commit/%h): %s")
-                    CHANGELOG_URL="$REPO_URL/compare/$P_TAG...$L_TAG"
-                fi
-
-                echo "**Full Changelog**: $CHANGELOG_URL" > release_body.md
-                echo "" >> release_body.md
-                echo "$GIT_LOG" >> release_body.md
-                cat release_body.md
-
-            - name: Upload release body
-              uses: actions/upload-artifact@v4
-              with:
-                name: release-body
-                path: release_body.md
-
             - name: Detect Minecraft versions matrix
               id: matrix
               run: |
@@ -288,10 +262,25 @@ jobs:
                 merge-multiple: true
                 path: build/libs
 
-            - name: Download release body
-              uses: actions/download-artifact@v4
-              with:
-                name: release-body
+            - name: Detect release body
+              id: release_body
+              run: |
+                REPO_URL="https://github.com/${{ github.repository }}"
+                L_TAG="${{ needs.prepare.outputs.last_tag }}"
+                P_TAG="${{ needs.prepare.outputs.prev_tag }}"
+
+                if [ -z "$P_TAG" ]; then
+                    GIT_LOG=$(git log "$L_TAG" --pretty=format:"- [#%h]($REPO_URL/commit/%h): %s")
+                    CHANGELOG_URL="$REPO_URL/releases/tag/$L_TAG"
+                else
+                    GIT_LOG=$(git log "$P_TAG..$L_TAG" --pretty=format:"- [#%h]($REPO_URL/commit/%h): %s")
+                    CHANGELOG_URL="$REPO_URL/compare/$P_TAG...$L_TAG"
+                fi
+
+                echo "**Full Changelog**: $CHANGELOG_URL" > release_body.md
+                echo "" >> release_body.md
+                echo "$GIT_LOG" >> release_body.md
+                cat release_body.md
 
             - name: Create release on GitHub
               uses: softprops/action-gh-release@v2
