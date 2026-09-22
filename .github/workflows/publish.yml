@@ -2,6 +2,27 @@ name: Publish on release
 
 on:
     workflow_dispatch:
+        inputs:
+            tag:
+                description: 'MC Versions to publish (comma-separated, e.g., 26.3,26.2,26.1). File in versions directory must exist for each version. If empty, all versions will be published'
+                required: false
+                type: string
+                default: ''
+            skip_github_release:
+                description: 'Skip creating a GitHub release'
+                required: false
+                type: boolean
+                default: false
+            skip_neoforge_upload:
+                description: 'Skip uploading NeoForge artifacts'
+                required: false
+                type: boolean
+                default: false
+            skip_fabric_upload:
+                description: 'Skip uploading Fabric artifacts'
+                required: false
+                type: boolean
+                default: false
     push:
         tags:
             - 'v1.*'
@@ -10,64 +31,49 @@ permissions:
     contents: write
 
 jobs:
-    build:
+    prepare:
         runs-on: ubuntu-24.04
         outputs:
+            matrix: ${{ steps.matrix.outputs.matrix }}
             last_tag: ${{ steps.tags.outputs.LAST_TAG }}
             prev_tag: ${{ steps.tags.outputs.PREV_TAG }}
+            mod_version: ${{ steps.tags.outputs.MOD_VERSION }}
         steps:
             - name: Checkout
               uses: actions/checkout@v4
               with:
                 fetch-depth: 0
 
-            - name: Detect tags
+            - name: Detect tags and version
               id: tags
               run: |
-                ALL_TAGS=$(git tag --sort=-creatordate | grep -E '^v1\.')
-                LAST_TAG=$(echo "$ALL_TAGS" | sed -n '1p')
-                PREV_TAG=$(echo "$ALL_TAGS" | sed -n '2p')
-                echo "LAST_TAG=$LAST_TAG" >> $GITHUB_OUTPUT
-                echo "PREV_TAG=$PREV_TAG" >> $GITHUB_OUTPUT
+                TAGS=$(git tag --list "v*" --sort=-version:refname)
+                LATEST_TAG=$(echo "$TAGS" | sed -n '1p')
 
-            - name: Setup JDK
-              uses: actions/setup-java@v4
-              with:
-                java-version: 25
-                distribution: microsoft
+                if [[ "${GITHUB_REF}" =~ ^refs/tags/ ]]; then
+                    CURRENT_TAG="${GITHUB_REF_NAME}"
+                else
+                    CURRENT_TAG="$LATEST_TAG"
+                fi
 
-            - name: Build project
-              run: |
-                chmod +x ./gradlew
-                ./gradlew build
+                if [ -z "$CURRENT_TAG" ]; then
+                    echo "No tag detected"
+                    exit 1
+                fi
 
-            - name: Upload build artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                name: build-libs
-                path: build/libs/*
-                if-no-files-found: ignore
+                LAST_TAG="$CURRENT_TAG"
+                MOD_VERSION="${LAST_TAG#v}"
+                PREV_TAG=$(echo "$TAGS" | grep -A 1 -Fx "$LAST_TAG" | sed -n '2p')
 
-            - name: Cleanup artifacts
-              run: rm -f build/libs/*-sources.jar build/libs/*-javadoc.jar
+                echo "Current/Last tag: $LAST_TAG"
+                echo "Previous tag: $PREV_TAG"
+                echo "Mod version: $MOD_VERSION"
 
-            - name: Generate release title
-              id: release_title
-              run: |
-                  TAG_NAME="${{ steps.tags.outputs.LAST_TAG }}"
-                  if [[ "$TAG_NAME" == *"+"* ]]; then
-                      # substring after the last "+" character and before the first "-" character
-                      TAG_NAME=$(echo "$TAG_NAME" | sed -E 's/.*\+([^+-]+).*/\1/')
-                      VERSION=$(echo "$TAG_NAME" | sed -E 's/.*-([^-+]+)\+.*/\1/')
-                      echo "Minecraft version detected in tag: $TAG_NAME"
-                      echo "Project version is $VERSION"
-                      echo "TITLE=$TAG_NAME ($VERSION)" >> $GITHUB_OUTPUT
-                  else
-                      echo "No Minecraft version detected in tag, using full tag as title: $TAG_NAME"
-                      echo "TITLE=$TAG_NAME" >> $GITHUB_OUTPUT
-                  fi
+                echo "LAST_TAG=$LAST_TAG" >> "$GITHUB_OUTPUT"
+                echo "PREV_TAG=$PREV_TAG" >> "$GITHUB_OUTPUT"
+                echo "MOD_VERSION=$MOD_VERSION" >> "$GITHUB_OUTPUT"
 
-            - name: Generate release body
+            - name: Detect release body
               id: release_body
               run: |
                 REPO_URL="https://github.com/${{ github.repository }}"
@@ -85,14 +91,215 @@ jobs:
                 echo "**Full Changelog**: $CHANGELOG_URL" > release_body.md
                 echo "" >> release_body.md
                 echo "$GIT_LOG" >> release_body.md
+                cat release_body.md
 
-            - name: Create release with assets
+            - name: Upload release body
+              uses: actions/upload-artifact@v4
+              with:
+                name: release-body
+                path: release_body.md
+
+            - name: Detect Minecraft versions matrix
+              id: matrix
+              run: |
+                VERSIONS="${{ inputs.tag }}"
+                if [ -z "$VERSIONS" ]; then
+                    VERSION_FILES=$(ls -1r versions/*.properties 2>/dev/null)
+                    VERSIONS=$(echo "$VERSION_FILES" | sed -E 's|versions/(.*)\.properties|\1|' | paste -sd, -)
+                fi
+
+                MATRIX="[]"
+                IFS=',' read -ra VERSION_LIST <<< "$VERSIONS"
+
+                for VERSION in "${VERSION_LIST[@]}"; do
+                    VERSION=$(echo "$VERSION" | tr -d ' \r\n')
+                    [ -n "$VERSION" ] || continue
+
+                    VERSION_PROPERTIES="versions/${VERSION}.properties"
+
+                    if [ -f "$VERSION_PROPERTIES" ]; then
+                        MIN_MINECRAFT_VERSION=$(grep -E '^minecraft_version=' "$VERSION_PROPERTIES" | cut -d'=' -f2 | tr -d ' \r\n')
+                        MAX_MINECRAFT_VERSION=$(grep -E '^minecraft_version_max=' "$VERSION_PROPERTIES" | cut -d'=' -f2 | tr -d ' \r\n')
+                    else
+                        echo "Warning: Version properties file not found for $VERSION. Skipping."
+                        continue
+                    fi
+
+                    [ -n "$MIN_MINECRAFT_VERSION" ] || MIN_MINECRAFT_VERSION="$VERSION"
+                    [ -n "$MAX_MINECRAFT_VERSION" ] || MAX_MINECRAFT_VERSION="$MIN_MINECRAFT_VERSION"
+
+                    if [ "$MIN_MINECRAFT_VERSION" = "$MAX_MINECRAFT_VERSION" ]; then
+                        GAME_VERSIONS="[$MIN_MINECRAFT_VERSION]"
+                    else
+                        GAME_VERSIONS="[$MIN_MINECRAFT_VERSION,$MAX_MINECRAFT_VERSION]"
+                    fi
+
+                    MATRIX=$(echo "$MATRIX" | jq -c \
+                        --arg VERSION "$VERSION" \
+                        --arg GAME_VERSIONS "$GAME_VERSIONS" \
+                        '. += [{"version": $VERSION, "game_versions": $GAME_VERSIONS}]')
+                done
+
+                echo "Generated matrix: $MATRIX"
+                echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+
+    build:
+        needs: prepare
+        runs-on: ubuntu-24.04
+        strategy:
+            matrix:
+                include: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            - name: Setup JDK
+              uses: actions/setup-java@v4
+              with:
+                java-version: 25
+                distribution: microsoft
+
+            - name: Build project
+              run: |
+                chmod +x ./gradlew
+                ./gradlew build -PmcVersion=${{ matrix.version }}
+
+            - name: Cleanup artifacts
+              run: rm -f build/libs/*-sources.jar build/libs/*-javadoc.jar
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: build-libs-${{ matrix.version }}
+                path: build/libs/*
+                if-no-files-found: ignore
+
+    publish-fabric:
+        needs: [prepare, build]
+        if: ${{ !inputs.skip_fabric_upload }}
+        runs-on: ubuntu-24.04
+        strategy:
+            matrix:
+                include: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        steps:
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                name: build-libs-${{ matrix.version }}
+                path: build/libs
+
+            - name: Check for Fabric artifact
+              id: check
+              run: |
+                shopt -s nullglob
+                files=(build/libs/*-fabric-*.jar)
+                if (( ${#files[@]} > 0 )); then
+                    echo "Found Fabric artifact: ${files[*]}"
+                    echo "FOUND=1" >> "$GITHUB_OUTPUT"
+                else
+                    echo "No Fabric artifact found for ${{ matrix.version }}"
+                    echo "FOUND=0" >> "$GITHUB_OUTPUT"
+                fi
+
+            - name: Create release on Modrinth and CurseForge (Fabric)
+              uses: Kira-NT/mc-publish@v3
+              if: steps.check.outputs.FOUND == '1'
+              with:
+                modrinth-id: ${{ vars.MODRINTH_ID }}
+                modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+                curseforge-id: ${{ vars.CURSEFORGE_ID }}
+                curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+                name: "${{ matrix.version }} (${{ needs.prepare.outputs.mod_version }}, Fabric)"
+                version: "${{ needs.prepare.outputs.last_tag }}+${{ matrix.version }}"
+                version-type: ${{ contains(needs.prepare.outputs.last_tag, '-beta') || contains(needs.prepare.outputs.last_tag, '-alpha') && 'beta' || 'release' }}
+                changelog: "[See on GitHub](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.prepare.outputs.last_tag }})"
+                game-versions: "${{ matrix.game_versions }}"
+                java: 25
+                environment: client | server
+                # - = -
+                modrinth-dependencies: fabric-api(required)
+                curseforge-dependencies: 306612(required)
+                # - = -
+                fail-mode: 'warn'
+                loaders: fabric
+                files: |-
+                    build/libs/*-fabric-*.jar
+
+    publish-neoforge:
+        needs: [prepare, build]
+        if: ${{ !inputs.skip_neoforge_upload }}
+        runs-on: ubuntu-24.04
+        strategy:
+            matrix:
+                include: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        steps:
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                name: build-libs-${{ matrix.version }}
+                path: build/libs
+
+            - name: Check for NeoForge artifact
+              id: check
+              run: |
+                shopt -s nullglob
+                files=(build/libs/*-neoforge-*.jar)
+                if (( ${#files[@]} > 0 )); then
+                    echo "Found NeoForge artifact: ${files[*]}"
+                    echo "FOUND=1" >> "$GITHUB_OUTPUT"
+                else
+                    echo "No NeoForge artifact found for ${{ matrix.version }}"
+                    echo "FOUND=0" >> "$GITHUB_OUTPUT"
+                fi
+
+            - name: Create release on Modrinth and CurseForge (NeoForge)
+              uses: Kira-NT/mc-publish@v3
+              if: steps.check.outputs.FOUND == '1'
+              with:
+                modrinth-id: ${{ vars.MODRINTH_ID }}
+                modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+                curseforge-id: ${{ vars.CURSEFORGE_ID }}
+                curseforge-token: ${{ secrets.CURSEFORGE_TOKEN }}
+                name: "${{ matrix.version }} (${{ needs.prepare.outputs.mod_version }}, NeoForge)"
+                version: "${{ needs.prepare.outputs.last_tag }}+${{ matrix.version }}"
+                version-type: ${{ contains(needs.prepare.outputs.last_tag, '-beta') || contains(needs.prepare.outputs.last_tag, '-alpha') && 'beta' || 'release' }}
+                changelog: "[See on GitHub](${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ needs.prepare.outputs.last_tag }})"
+                game-versions: "${{ matrix.game_versions }}"
+                java: 25
+                environment: client | server
+                # - = -
+                # - = -
+                fail-mode: 'warn'
+                loaders: neoforge
+                files: |-
+                    build/libs/*-neoforge-*.jar
+
+    publish-github:
+        needs: [prepare, build]
+        if: ${{ !inputs.skip_github_release }}
+        runs-on: ubuntu-24.04
+        steps:
+            - name: Download build artifacts
+              uses: actions/download-artifact@v4
+              with:
+                pattern: build-libs-*
+                merge-multiple: true
+                path: build/libs
+
+            - name: Download release body
+              uses: actions/download-artifact@v4
+              with:
+                name: release-body
+
+            - name: Create release on GitHub
               uses: softprops/action-gh-release@v2
               with:
-                tag_name: ${{ steps.tags.outputs.LAST_TAG }}
-                name: ${{ steps.release_title.outputs.TITLE }}
+                tag_name: ${{ needs.prepare.outputs.last_tag }}
+                name: ${{ needs.prepare.outputs.last_tag }}
                 body_path: release_body.md
                 files: build/libs/*
-                prerelease: ${{ contains(steps.tags.outputs.LAST_TAG, '-beta') || contains(steps.tags.outputs.LAST_TAG, '-alpha') }}
+                prerelease: ${{ contains(needs.prepare.outputs.last_tag, '-beta') || contains(needs.prepare.outputs.last_tag, '-alpha') }}
               env:
                 GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
