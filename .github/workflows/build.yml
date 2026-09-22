@@ -1,27 +1,66 @@
 name: Build project
 
 on:
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: 'MC Versions to publish (comma-separated, e.g., 26.3,26.2,26.1). File in versions directory must exist for each version. If empty, all versions will be published'
+                required: false
+                type: string
+                default: ''
     pull_request:
     push:
         branches:
             - main
 
 jobs:
-    build:
+    prepare:
         runs-on: ubuntu-24.04
+        outputs:
+            matrix: ${{ steps.matrix.outputs.matrix }}
         steps:
-            -   name: Checkout
-                uses: actions/checkout@v4
-                with:
-                    fetch-depth: 0
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
 
-            -   name: Setup JDK
-                uses: actions/setup-java@v4
-                with:
-                    java-version: 25
-                    distribution: microsoft
+            - name: Detect Minecraft versions
+              id: matrix
+              uses: ./.github/actions/detect-minecraft-versions
+              with:
+                versions: ${{ inputs.tag }}
 
-            -   name: Build project
-                run: |
-                    chmod +x ./gradlew
-                    ./gradlew build
+    build:
+        name: ${{ matrix.version }}
+        needs: prepare
+        runs-on: ubuntu-24.04
+        strategy:
+            fail-fast: false
+            matrix:
+                include: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
+            - name: Setup JDK
+              uses: actions/setup-java@v4
+              with:
+                java-version: 25
+                distribution: microsoft
+
+            - name: Build project
+              run: |
+                chmod +x ./gradlew
+                ./gradlew build -PmcVersion=${{ matrix.version }}
+
+            - name: Cleanup artifacts
+              run: rm -f build/libs/*-sources.jar build/libs/*-javadoc.jar
+
+            - name: Upload build artifacts
+              uses: actions/upload-artifact@v4
+              with:
+                name: build-libs-${{ matrix.version }}
+                path: build/libs/*
+                if-no-files-found: ignore
