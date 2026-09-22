@@ -33,7 +33,12 @@ tasks.named('processResources', ProcessResources).configure {
 	from project(':common').sourceSets.main.resources
 	inputs.property 'version', mod_version
 	filesMatching('META-INF/neoforge.mods.toml') {
-		expand 'version': mod_version
+		expand(
+			version: mod_version,
+			minecraft_version: minecraft_version,
+			minecraft_version_max: minecraft_version_max,
+			loader_version: neoforge_version
+		)
 	}
 }
 

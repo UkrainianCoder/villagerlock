@@ -16,13 +16,13 @@ config = "villager-lock.mixins.json"
 [[dependencies.villagerlock]]
 modId = "neoforge"
 type = "required"
-versionRange = "[1,)"
+versionRange = "[${loader_version},)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.villagerlock]]
 modId = "minecraft"
 type = "required"
-versionRange = "[26.1,)"
+versionRange = "[${minecraft_version},${minecraft_version_max}]"
 ordering = "NONE"
 side = "BOTH"

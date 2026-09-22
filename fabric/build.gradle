@@ -19,7 +19,14 @@ tasks.named('processResources', ProcessResources).configure {
 	from project(':common').sourceSets.main.resources
 	inputs.property 'version', mod_version
 	filesMatching('fabric.mod.json') {
-		expand 'version': mod_version
+		expand(
+			version: mod_version,
+			minecraft_version: minecraft_version,
+			minecraft_version_max: minecraft_version_max,
+			java_version: java_version,
+			loader_version: loader_version,
+			fabric_version: fabric_api_version
+		)
 	}
 }
 
