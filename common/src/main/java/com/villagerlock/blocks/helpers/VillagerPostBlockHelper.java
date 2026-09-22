@@ -17,8 +17,7 @@ public class VillagerPostBlockHelper {
 
 	public static VillagerPostBlockEntity getVillagerPostEntity(Level world, BlockPos pos, UUID uuid) {
 		BlockPos[] adjacentPositions = new BlockPos[]{
-				pos,
-				pos.below()
+				pos, pos.below()
 		};
 
 		for (BlockPos adjacent : adjacentPositions) {
