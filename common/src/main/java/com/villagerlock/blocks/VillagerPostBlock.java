@@ -103,6 +103,10 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 
 	@Override
 	public @NonNull BlockState playerWillDestroy(Level world, @NonNull BlockPos pos, @NonNull BlockState state, @NonNull Player player) {
+		if (world.isClientSide()) {
+			return super.playerWillDestroy(world, pos, state, player);
+		}
+
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof VillagerPostBlockEntity postBlockEntity) {
 			postBlockEntity.unseat(world, true);
@@ -151,15 +155,17 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 
 	@Override
 	public void neighborChanged(@NonNull BlockState state, Level world, @NonNull BlockPos pos, @NonNull Block sourceBlock, Orientation wireOrientation, boolean notify) {
-		if (!world.isClientSide()) {
-			boolean hasSignal = world.hasNeighborSignal(pos);
-			if (hasSignal && world.getBlockEntity(pos) instanceof VillagerPostBlockEntity post && post.isOccupied()) {
-				post.unseat(world, true);
-			}
+		if (world.isClientSide()) {
+			return;
+		}
 
-			if (hasSignal != state.getValue(BlockStateProperties.POWERED)) {
-				world.setBlock(pos, state.setValue(BlockStateProperties.POWERED, hasSignal), 3);
-			}
+		boolean hasSignal = world.hasNeighborSignal(pos);
+		if (hasSignal && world.getBlockEntity(pos) instanceof VillagerPostBlockEntity post && post.isOccupied()) {
+			post.unseat(world, true);
+		}
+
+		if (hasSignal != state.getValue(BlockStateProperties.POWERED)) {
+			world.setBlock(pos, state.setValue(BlockStateProperties.POWERED, hasSignal), 3);
 		}
 	}
 
@@ -167,9 +173,9 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	public @NonNull FluidState getFluidState(BlockState state) {
 		if (state.getValue(BlockStateProperties.WATERLOGGED)) {
 			return Fluids.WATER.getSource(false);
-		} else {
-			return super.getFluidState(state);
 		}
+
+		return super.getFluidState(state);
 	}
 
 	@Override
@@ -207,7 +213,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 	}
 
 	@Override
-	public @Nullable <T extends BlockEntity> GameEventListener getListener(@NonNull ServerLevel world, T blockEntity) {
+	public @Nullable <T extends BlockEntity> GameEventListener getListener(@NonNull ServerLevel world, @NonNull T blockEntity) {
 		return super.getListener(world, blockEntity);
 	}
 
