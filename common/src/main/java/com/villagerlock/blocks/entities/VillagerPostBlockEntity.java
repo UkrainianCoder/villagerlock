@@ -57,7 +57,7 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		}
 	}
 
-	public void unseat(@NonNull Level world, @NonNull boolean teleportToFreeBlock) {
+	public void unseat(@NonNull Level world, boolean teleportToFreeBlock) {
 		if (isOccupied()) {
 			Entity rider = this.getEntity(world);
 

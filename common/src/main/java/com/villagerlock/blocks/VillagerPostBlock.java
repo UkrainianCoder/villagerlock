@@ -193,10 +193,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		return this.defaultBlockState().setValue(
 				BlockStateProperties.HORIZONTAL_FACING,
 				ctx.getHorizontalDirection().getOpposite()
-		).setValue(
-				BlockStateProperties.POWERED,
-				ctx.getLevel().hasNeighborSignal(ctx.getClickedPos())
-		);
+		).setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
 	}
 
 	@Override
@@ -212,6 +209,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		return state.rotate(mirror.getRotation(state.getValue(BlockStateProperties.HORIZONTAL_FACING)));
 	}
 
+	// <26.3
 	protected @NonNull MapCodec<? extends BaseEntityBlock> codec() {
 		return MapCodec.unit(this);
 	}
