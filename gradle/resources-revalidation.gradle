@@ -28,7 +28,7 @@ def generateAxeTagFile = tasks.register('generateAxeTagFile') {
     }
 }
 
-tasks.withType(Jar).configureEach {
+tasks.withType(ProcessResources).configureEach {
     dependsOn generateAxeTagFile
 
     from(generateAxeTagFile) {
