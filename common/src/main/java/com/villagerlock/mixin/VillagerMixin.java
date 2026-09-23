@@ -142,7 +142,6 @@ public class VillagerMixin {
 	}
 
 	@Inject(method = "tick", at = @At("TAIL"))
-	@SuppressWarnings("resource")
 	private void onTick(CallbackInfo ci) {
 		Villager villager = (Villager) (Object) this;
 		if (!(villager.level() instanceof ServerLevel world) || world.getGameTime() % 10 != 0) {
