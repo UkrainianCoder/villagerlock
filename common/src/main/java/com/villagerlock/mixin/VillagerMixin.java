@@ -149,7 +149,7 @@ public class VillagerMixin {
 			return;
 		}
 
-		if (VillagerPostBlockHelper.getVillagerPostEntity(villager) != null) {
+		if (VillagerPostBlockHelper.getPostEntity(villager) != null) {
 			if (villager.getVillagerXp() > 0) {
 				Brain<Villager> brain = villager.getBrain();
 				Optional<GlobalPos> memoryInternal = brain.getMemoryInternal(MemoryModuleType.JOB_SITE);

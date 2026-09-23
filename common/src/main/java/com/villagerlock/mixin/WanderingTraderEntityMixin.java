@@ -1,6 +1,6 @@
 package com.villagerlock.mixin;
 
-import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
+import com.villagerlock.blocks.helpers.VillagerPostBlockHelper;
 import net.minecraft.world.entity.npc.wanderingtrader.WanderingTrader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,7 +13,7 @@ public class WanderingTraderEntityMixin {
 	private void preventDespawn(CallbackInfo ci) {
 		WanderingTrader trader = (WanderingTrader) (Object) this;
 
-		if (VillagerPostBlockEntity.isEntityOnPost(trader)) {
+		if (VillagerPostBlockHelper.isEntityOnPost(trader)) {
 			// Delay despawn is not calculating if canceled, so we don't need to set delay despawn here
 			ci.cancel();
 		}

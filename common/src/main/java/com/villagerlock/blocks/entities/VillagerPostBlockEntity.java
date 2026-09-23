@@ -1,24 +1,18 @@
 package com.villagerlock.blocks.entities;
 
+import com.villagerlock.helpers.EntityFreezeHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
@@ -33,10 +27,6 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		super(VILLAGER_POST_ENTITY.get(), pos, state);
 	}
 
-	public static boolean isEntityOnPost(Entity entity) {
-		return entity.entityTags().contains("locked_on_post");
-	}
-
 	public boolean isOccupied() {
 		return _entityUuid != null;
 	}
@@ -45,90 +35,42 @@ public class VillagerPostBlockEntity extends BlockEntity {
 		return _entityUuid;
 	}
 
-	@SuppressWarnings("resource")
-	private void freezeEntity(Entity entity) {
-		BlockState state = entity.level().getBlockState(worldPosition);
-		Direction facing = Direction.NORTH;
-
-		if (state.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
-			facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
-		} else if (state.hasProperty(BlockStateProperties.FACING)) {
-			facing = state.getValue(BlockStateProperties.FACING);
+	public Entity getEntity(Level world) {
+		if (world == null) {
+			return getEntity(level);
 		}
 
-		entity.setNoGravity(true);
-
-		if (entity instanceof LivingEntity living) {
-			var attribute = living.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-			if (attribute != null) {
-				attribute.setBaseValue(1.0);
-			}
+		if (isOccupied()) {
+			return world.getEntity(_entityUuid);
 		}
 
-		if (entity instanceof Mob mobEntity) {
-			mobEntity.getNavigation().stop();
-			mobEntity.setZza(0);
-			mobEntity.setXxa(0);
-		}
-
-		float blockYaw = facing.toYRot();
-		entity.setDeltaMovement(Vec3.ZERO);
-		entity.snapTo(
-				worldPosition.getX() + 0.5,
-				worldPosition.getY() + 0.05,
-				worldPosition.getZ() + 0.5,
-				blockYaw,
-				0.00f
-		);
-
-		if (entity instanceof LivingEntity living) {
-			living.setYHeadRot(blockYaw);
-			living.setYBodyRot(blockYaw);
-		}
-
-		entity.needsSync = true;
+		return null;
 	}
 
-	private void unfreezeEntity(Entity entity, boolean spawnAboveBlock) {
-		entity.setNoGravity(false);
-
-		if (entity instanceof LivingEntity living) {
-			AttributeInstance attribute = living.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-
-			if (attribute != null) {
-				attribute.setBaseValue(0.0);
-			}
-
-			if (spawnAboveBlock) {
-				double spawnX = worldPosition.getX() + 0.5;
-				double spawnY = worldPosition.getY() + 0.2;
-				double spawnZ = worldPosition.getZ() + 0.5;
-				living.teleportTo(spawnX, spawnY, spawnZ);
-				living.setDeltaMovement(0, 0, 0);
-			}
-		}
-	}
-
-	public void seat(Level world, Entity entity) {
+	public void seat(@NonNull Level world, @NonNull Entity entity) {
 		if (!isOccupied() && !world.hasNeighborSignal(worldPosition)) {
 			_entityUuid = entity.getUUID();
 			entity.addTag("locked_on_post");
-			freezeEntity(entity);
-			setChanged();
+			EntityFreezeHelper.freezeEntity(entity, worldPosition);
 			world.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-			LOGGER.info("Seat entity {} on post block {}", _entityUuid, worldPosition);
+			LOGGER.info("Seat entity {} on post block {}", entity, worldPosition);
 		}
 	}
 
-	public void unseat(Level world, boolean teleportToFreeBlock) {
+	public void unseat(@NonNull Level world, @NonNull boolean teleportToFreeBlock) {
 		if (isOccupied()) {
-			LOGGER.info("Unseat entity {} on post block {}", _entityUuid, worldPosition);
-
-			Entity rider = world.getEntity(_entityUuid);
+			Entity rider = this.getEntity(world);
 
 			if (rider != null) {
 				rider.removeTag("locked_on_post");
-				unfreezeEntity(rider, teleportToFreeBlock);
+				EntityFreezeHelper.unfreezeEntity(rider, teleportToFreeBlock ? worldPosition : null);
+				LOGGER.info("Unseat entity {} on post block {}", rider, worldPosition);
+			} else {
+				LOGGER.warn(
+						"Unseat entity with UUID {} on post block {} but entity not found in world",
+						_entityUuid,
+						worldPosition
+				);
 			}
 
 			_entityUuid = null;

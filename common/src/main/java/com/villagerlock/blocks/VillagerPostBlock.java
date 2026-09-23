@@ -3,6 +3,7 @@ package com.villagerlock.blocks;
 import com.mojang.serialization.MapCodec;
 import com.villagerlock.ModBlocks;
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
+import com.villagerlock.blocks.helpers.VillagerPostBlockHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -134,7 +135,7 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (!(blockEntity instanceof VillagerPostBlockEntity postBlockEntity)) {
 			return;
-		} else if (postBlockEntity.isOccupied() || VillagerPostBlockEntity.isEntityOnPost(entity)) {
+		} else if (postBlockEntity.isOccupied() || VillagerPostBlockHelper.isEntityOnPost(entity)) {
 			return;
 		} else if (!(entity instanceof LivingEntity livingEntity) || entity.getVehicle() != null) {
 			return;
@@ -192,7 +193,10 @@ public class VillagerPostBlock extends BaseEntityBlock implements EntityBlock, S
 		return this.defaultBlockState().setValue(
 				BlockStateProperties.HORIZONTAL_FACING,
 				ctx.getHorizontalDirection().getOpposite()
-		).setValue(BlockStateProperties.POWERED, ctx.getLevel().hasNeighborSignal(ctx.getClickedPos()));
+		).setValue(
+				BlockStateProperties.POWERED,
+				ctx.getLevel().hasNeighborSignal(ctx.getClickedPos())
+		);
 	}
 
 	@Override
