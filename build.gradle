@@ -52,6 +52,24 @@ subprojects {
 
         withSourcesJar()
     }
+
+    sourceSets {
+        main {
+            resources {
+                if (vl_supports_poplar != 'true') {
+                    exclude 'assets/villager-lock/blockstates/villagerpost_poplar.json'
+                    exclude 'assets/villager-lock/items/villagerpost_poplar.json'
+                    exclude 'assets/villager-lock/models/block/villagerpost_poplar.json'
+                    exclude 'data/villager-lock/advancement/recipes/villagerpost_poplar.json'
+                    exclude 'data/villager-lock/loot_table/blocks/villagerpost_poplar.json'
+                    exclude 'data/villager-lock/recipe/villagerpost_poplar.json'
+                    // Has on common\src\main\resources\data\minecraft\tags\block\mineable\axe.json
+                    // Has on common\src\main\resources\assets\villager-lock\lang/*.json
+                    // No minecraft errors about non registered blocks, so no need to rewrite the specified files to remove the poplar post
+                }
+            }
+        }
+    }
 }
 
 tasks.register('copyArtifacts', Copy) {
@@ -65,6 +83,5 @@ tasks.register('copyArtifacts', Copy) {
 
 tasks.register('build') {
     dependsOn ':fabric:build', ':neoforge:build'
-
     finalizedBy 'copyArtifacts'
 }
