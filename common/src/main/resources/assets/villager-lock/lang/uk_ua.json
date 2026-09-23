@@ -30,5 +30,8 @@
   "item.villager-lock.villagerpost_spruce": "Пост селянина з ялини",
 
   "block.villager-lock.villagerpost_warped": "Химерний пост селянина",
-  "item.villager-lock.villagerpost_warped": "Химерний пост селянина"
+  "item.villager-lock.villagerpost_warped": "Химерний пост селянина",
+
+  "block.villager-lock.villagerpost_poplar": "Пост селянина з тополі",
+  "item.villager-lock.villagerpost_poplar": "Пост селянина з тополі"
 }

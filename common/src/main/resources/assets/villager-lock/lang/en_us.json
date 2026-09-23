@@ -30,5 +30,8 @@
   "item.villager-lock.villagerpost_spruce": "Spruce Villager Post",
 
   "block.villager-lock.villagerpost_warped": "Warped Villager Post",
-  "item.villager-lock.villagerpost_warped": "Warped Villager Post"
+  "item.villager-lock.villagerpost_warped": "Warped Villager Post",
+
+  "block.villager-lock.villagerpost_poplar": "Poplar Villager Post",
+  "item.villager-lock.villagerpost_poplar": "Poplar Villager Post"
 }

@@ -1,0 +1,9 @@
+{
+  "multipart": [
+    { "apply": { "model": "villager-lock:block/villagerpost_poplar" }},
+    {
+      "when": { "powered": "true" },
+      "apply": { "model": "villager-lock:block/villagerpost_on" }
+    }
+  ]
+}
