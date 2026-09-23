@@ -1,0 +1,53 @@
+import groovy.json.JsonOutput
+
+def generateAxeTagFile = tasks.register('generateAxeTagFile') {
+    def outputFile = layout.buildDirectory.file(
+            'generated-resources/data/minecraft/tags/block/mineable/axe.json'
+    )
+
+    outputs.file(outputFile)
+
+    doLast {
+        def allBlocks = file('../common/src/main/resources/assets/villager-lock/blockstates')
+        def neededBlocks = allBlocks.listFiles()
+                .findAll { it.isFile() && it.name.endsWith('.json') }
+                .collect { it.name[0..-6] }
+                .findAll { vl_supports_poplar == 'true' || it != 'villagerpost_poplar' }
+                .sort()
+
+        def json = JsonOutput.prettyPrint(
+                JsonOutput.toJson([
+                        replace: false,
+                        values: neededBlocks.collect { "villager-lock:${it}" }
+                ])
+        )
+
+        def target = outputFile.get().asFile
+        target.parentFile.mkdirs()
+        target.text = json
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    dependsOn generateAxeTagFile
+
+    from(generateAxeTagFile) {
+        into 'data/minecraft/tags/block/mineable'
+        include 'axe.json'
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            if (vl_supports_poplar != 'true') {
+                exclude 'assets/villager-lock/blockstates/villagerpost_poplar.json'
+                exclude 'assets/villager-lock/items/villagerpost_poplar.json'
+                exclude 'assets/villager-lock/models/block/villagerpost_poplar.json'
+                exclude 'data/villager-lock/advancement/recipes/villagerpost_poplar.json'
+                exclude 'data/villager-lock/loot_table/blocks/villagerpost_poplar.json'
+                exclude 'data/villager-lock/recipe/villagerpost_poplar.json'
+            }
+        }
+    }
+}
