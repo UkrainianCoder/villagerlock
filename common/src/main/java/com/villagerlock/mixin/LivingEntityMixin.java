@@ -14,8 +14,8 @@ public class LivingEntityMixin {
 	@Inject(method = "die", at = @At("HEAD"))
 	private void onEntityDeath(DamageSource source, CallbackInfo ci) {
 		LivingEntity entity = (LivingEntity) (Object) this;
-		if (VillagerPostBlockEntity.isEntityOnPost(entity)) {
-			VillagerPostBlockEntity postEntity = VillagerPostBlockHelper.getVillagerPostEntity(entity);
+		if (VillagerPostBlockHelper.isEntityOnPost(entity)) {
+			VillagerPostBlockEntity postEntity = VillagerPostBlockHelper.getPostEntity(entity);
 			if (postEntity != null && postEntity.isOccupied() && postEntity.getEntityUuid().equals(entity.getUUID())) {
 				postEntity.unseat(entity.level(), false);
 			}

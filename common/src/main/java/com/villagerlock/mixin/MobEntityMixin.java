@@ -21,14 +21,14 @@ public abstract class MobEntityMixin {
 		}
 
 		if (oldEntity instanceof Villager oldVillager) {
-			VillagerPostBlockEntity entity = VillagerPostBlockHelper.getVillagerPostEntity(oldVillager);
+			VillagerPostBlockEntity entity = VillagerPostBlockHelper.getPostEntity(oldVillager);
 			if (entity != null && entity.isOccupied() && entity.getEntityUuid().equals(oldVillager.getUUID())) {
 				entity.unseat(oldEntity.level(), false);
 			}
 		}
 
 		if (oldEntity instanceof ZombieVillager oldZombieVillager) {
-			VillagerPostBlockEntity entity = VillagerPostBlockHelper.getVillagerPostEntity(oldZombieVillager);
+			VillagerPostBlockEntity entity = VillagerPostBlockHelper.getPostEntity(oldZombieVillager);
 			if (entity != null && entity.isOccupied() && entity.getEntityUuid().equals(oldZombieVillager.getUUID())) {
 				entity.unseat(oldEntity.level(), false);
 			}

@@ -2,6 +2,7 @@ package com.villagerlock.blocks.helpers;
 
 import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -9,13 +10,13 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import java.util.UUID;
 
 public class VillagerPostBlockHelper {
-	public static VillagerPostBlockEntity getVillagerPostEntity(LivingEntity villager) {
+	public static VillagerPostBlockEntity getPostEntity(LivingEntity villager) {
 		Level world = villager.level();
 		BlockPos pos = villager.blockPosition();
-		return getVillagerPostEntity(world, pos, villager.getUUID());
+		return getPostEntity(world, pos, villager.getUUID());
 	}
 
-	public static VillagerPostBlockEntity getVillagerPostEntity(Level world, BlockPos pos, UUID uuid) {
+	public static VillagerPostBlockEntity getPostEntity(Level world, BlockPos pos, UUID uuid) {
 		BlockPos[] adjacentPositions = new BlockPos[]{
 				pos, pos.below()
 		};
@@ -28,5 +29,9 @@ public class VillagerPostBlockHelper {
 		}
 
 		return null;
+	}
+
+	public static boolean isEntityOnPost(Entity entity) {
+		return entity.entityTags().contains("locked_on_post");
 	}
 }
