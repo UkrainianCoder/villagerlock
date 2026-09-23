@@ -30,5 +30,8 @@
   "item.villager-lock.villagerpost_spruce": "Dorfbewohnerposten aus Fichtenholz",
 
   "block.villager-lock.villagerpost_warped": "Wirr-Dorfbewohnerposten",
-  "item.villager-lock.villagerpost_warped": "Wirr-Dorfbewohnerposten"
+  "item.villager-lock.villagerpost_warped": "Wirr-Dorfbewohnerposten",
+
+  "block.villager-lock.villagerpost_poplar": "Dorfbewohnerposten aus Pappelholz",
+  "item.villager-lock.villagerpost_poplar": "Dorfbewohnerposten aus Pappelholz"
 }

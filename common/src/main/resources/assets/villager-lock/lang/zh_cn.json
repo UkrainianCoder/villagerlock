@@ -30,5 +30,8 @@
   "item.villager-lock.villagerpost_spruce": "云杉木村民岗亭",
 
   "block.villager-lock.villagerpost_warped": "诡异村民岗亭",
-  "item.villager-lock.villagerpost_warped": "诡异村民岗亭"
+  "item.villager-lock.villagerpost_warped": "诡异村民岗亭",
+
+  "block.villager-lock.villagerpost_poplar": "杨木村民岗亭",
+  "item.villager-lock.villagerpost_poplar": "杨木村民岗亭"
 }

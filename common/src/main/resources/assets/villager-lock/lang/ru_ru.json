@@ -30,6 +30,9 @@
   "item.villager-lock.villagerpost_spruce": "Пост жителя из ели",
 
   "block.villager-lock.villagerpost_warped": "Искажённый пост жителя",
-  "item.villager-lock.villagerpost_warped": "Искажённый пост жителя"
+  "item.villager-lock.villagerpost_warped": "Искажённый пост жителя",
+
+  "block.villager-lock.villagerpost_poplar": "Пост жителя из тополя",
+  "item.villager-lock.villagerpost_poplar": "Пост жителя из тополя"
 
 }
