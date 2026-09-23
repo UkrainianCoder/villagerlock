@@ -1,7 +1,6 @@
 package com.villagerlock.fabric;
 
 import com.villagerlock.VillagerLock;
-import com.villagerlock.blocks.entities.VillagerPostBlockEntity;
 import com.villagerlock.platform.BlockEntityFactory;
 import com.villagerlock.platform.PlatformHelper;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -14,6 +13,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 
@@ -46,14 +46,16 @@ public class FabricPlatformHelper implements PlatformHelper {
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public Supplier<BlockEntityType<VillagerPostBlockEntity>> registerVillagerPostEntity(String name, BlockEntityFactory<VillagerPostBlockEntity> factory, Supplier<? extends Block>... validBlocks) {
+	public <T extends BlockEntity> Supplier<BlockEntityType<T>> registerBlockEntity(String name, BlockEntityFactory<T> factory, Supplier<? extends Block>... validBlocks) {
 		Identifier id = Identifier.fromNamespaceAndPath(VillagerLock.MOD_ID, name);
 		Block[] blocks = Arrays.stream(validBlocks).map(Supplier::get).toArray(Block[]::new);
-		BlockEntityType<VillagerPostBlockEntity> blockEntityType = Registry.register(
+		BlockEntityType<T> blockEntityType = Registry.register(
 				BuiltInRegistries.BLOCK_ENTITY_TYPE,
 				id,
 				FabricBlockEntityTypeBuilder.create(factory::create, blocks).build()
 		);
+
+		VillagerLock.LOGGER.info("Registered block entity type with ID: {}", id);
 		return () -> blockEntityType;
 	}
 }

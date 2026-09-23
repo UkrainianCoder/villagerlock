@@ -145,7 +145,7 @@ public class ModBlocks {
 	);
 
 	@SuppressWarnings("unchecked")
-	public static final Supplier<BlockEntityType<VillagerPostBlockEntity>> VILLAGER_POST_ENTITY = Services.PLATFORM.registerVillagerPostEntity(
+	public static final Supplier<BlockEntityType<VillagerPostBlockEntity>> VILLAGER_POST_ENTITY = Services.PLATFORM.registerBlockEntity(
 			"villagerpost_entity",
 			VillagerPostBlockEntity::new,
 			VILLAGER_POST,
