@@ -2,7 +2,7 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "minecraft:block/poplar_planks",
+		"particle": "minecraft:block/poplar_log",
 		"stone": "villager-lock:block/stone_part",
 		"log": "minecraft:block/poplar_log",
 		"stripped": "minecraft:block/stripped_poplar_log"

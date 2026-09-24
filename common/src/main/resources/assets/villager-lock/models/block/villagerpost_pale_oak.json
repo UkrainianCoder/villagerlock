@@ -2,7 +2,7 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "minecraft:block/pale_oak_planks",
+		"particle": "minecraft:block/pale_oak_log",
 		"stone": "villager-lock:block/stone_part",
 		"log": "minecraft:block/pale_oak_log",
 		"stripped": "minecraft:block/stripped_pale_oak_log"
