@@ -2,7 +2,7 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "minecraft:block/warped_planks",
+		"particle": "minecraft:block/warped_stem",
 		"stone": "villager-lock:block/stone_part",
 		"log": "minecraft:block/warped_stem",
 		"stripped": "minecraft:block/stripped_warped_stem"

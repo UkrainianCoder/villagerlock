@@ -2,7 +2,7 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "minecraft:block/spruce_planks",
+		"particle": "minecraft:block/spruce_log",
 		"stone": "villager-lock:block/stone_part",
 		"log": "minecraft:block/spruce_log",
 		"stripped": "minecraft:block/stripped_spruce_log"

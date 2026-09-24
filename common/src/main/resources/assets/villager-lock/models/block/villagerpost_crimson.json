@@ -2,7 +2,7 @@
 	"format_version": "1.21.11",
 	"credit": "Made with Blockbench",
 	"textures": {
-		"particle": "minecraft:block/crimson_planks",
+		"particle": "minecraft:block/crimson_stem",
 		"stone": "villager-lock:block/stone_part",
 		"log": "minecraft:block/crimson_stem",
 		"stripped": "minecraft:block/stripped_crimson_stem"
