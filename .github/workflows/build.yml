@@ -15,6 +15,7 @@ on:
 
 jobs:
     prepare:
+        name: "Prepare for building"
         runs-on: ubuntu-24.04
         outputs:
             matrix: ${{ steps.matrix.outputs.matrix }}
@@ -31,7 +32,7 @@ jobs:
                 versions: ${{ inputs.tag }}
 
     build:
-        name: ${{ matrix.version }}
+        name: "Build for MC ${{ matrix.version }}"
         needs: prepare
         runs-on: ubuntu-24.04
         strategy:
