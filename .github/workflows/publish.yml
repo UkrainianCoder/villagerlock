@@ -32,6 +32,7 @@ permissions:
 
 jobs:
     prepare:
+        name: "Prepare for publishing"
         runs-on: ubuntu-24.04
         outputs:
             matrix: ${{ steps.matrix.outputs.matrix }}
@@ -81,7 +82,7 @@ jobs:
                 versions: ${{ inputs.tag }}
 
     build:
-        name: ${{ matrix.version }}
+        name: "Build for MC ${{ matrix.version }}"
         needs: prepare
         runs-on: ubuntu-24.04
         strategy:
@@ -115,7 +116,7 @@ jobs:
                 if-no-files-found: ignore
 
     publish-fabric:
-        name: ${{ matrix.version }}
+        name: "Publish fabric artifacts for MC ${{ matrix.version }}"
         needs: [prepare, build]
         if: ${{ !inputs.skip_fabric_upload }}
         runs-on: ubuntu-24.04
@@ -167,7 +168,7 @@ jobs:
                     build/libs/*-fabric-*.jar
 
     publish-neoforge:
-        name: ${{ matrix.version }}
+        name: "Publish neoforge artifacts for MC ${{ matrix.version }}"
         needs: [prepare, build]
         if: ${{ !inputs.skip_neoforge_upload }}
         runs-on: ubuntu-24.04
@@ -217,6 +218,7 @@ jobs:
                     build/libs/*-neoforge-*.jar
 
     publish-github:
+        name: "Publish artifacts to GitHub Release"
         needs: [prepare, build]
         if: ${{ !inputs.skip_github_release }}
         runs-on: ubuntu-24.04
